@@ -42,7 +42,16 @@ class Dataset(InMemoryDataset):
         path = self.root + self.processed_file_names()[0]
         df = pd.read_csv(path)
 
-        entities = pd.concat([df['ID_Synset'], df['ID_Relacionada']]).unique()
+        entities = pd.concat([df['ID_Synset'], 
+                              df['ID_Relacionada']]).unique()
+        definitions = pd.concat([df['Definição_Synset'],
+                                 df['Definição_Relacionada']]).unique()
         mapping = {name : i for i, name in enumerate(entities)}
         
+        edge_index_i =  df['ID_Synset'].map(mapping).to_numpy()
+        edge_index_j =  df['ID_Relacionada'].map(mapping).to_numpy()
+        edge_index = np.stack([edge_index_i, edge_index_j])
+
+        edge_type = df['Relacao'].map(self.edge2id).to_numpy()
+
         self.num_nodes = entities.shape[-1]
