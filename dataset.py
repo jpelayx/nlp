@@ -51,12 +51,16 @@ class RelationsDS(InMemoryDataset):
         path = os.path.join(self.root, self.raw_file_names[0])
         df = pd.read_csv(path)
 
-        entities = pd.concat([df['ID_Synset'], 
-                              df['ID_Relacionada']]).unique()
-        definitions = pd.concat([df['Definição_Synset'],
-                                 df['Definição_Relacionada']]).unique()
-        mapping = {name : i for i, name in enumerate(entities)}
-        
+        all_ids = pd.concat([df['ID_Synset'], df['ID_Relacionada']])
+        all_definitions = pd.concat([df['Definição_Synset'], df['Definição_Relacionada']])
+
+        entities = pd.DataFrame({'ID': all_ids, 
+                                'Definição': all_definitions}).drop_duplicates()
+       
+        ids = entities['ID'].to_numpy()
+        definitions = entities['Definição'].to_numpy()
+        mapping = {name : i for i, name in enumerate(ids)}
+
         edge_index_i =  df['ID_Synset'].map(mapping).to_numpy()
         edge_index_j =  df['ID_Relacionada'].map(mapping).to_numpy()
         edge_index = np.stack([edge_index_i, edge_index_j])
@@ -71,8 +75,8 @@ class RelationsDS(InMemoryDataset):
         token_type_ids = tokens.token_type_ids 
 
         data = Data()
-        data.edge_index = edge_index
-        data.edge_type = edge_type
+        data.edge_index = torch.tensor(edge_index, dtype=torch.long)
+        data.edge_type = torch.tensor(edge_type)
         data.token_ids = token_ids
         data.token_mask = token_mask
         data.token_type_ids = token_type_ids
