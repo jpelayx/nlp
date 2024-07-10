@@ -3,8 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from torch.nn import Module, ModuleList, Sequential
+from torch.utils.data import DataLoader
 from torch_geometric.nn import GCNConv
 from transformers import BertModel
+
+import numpy as np
 
 class Model(Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers, encoder=None) -> None:
@@ -25,15 +28,39 @@ class Model(Module):
             nn.Linear(hidden_dim, hidden_dim),
             nn.Linear(hidden_dim, output_dim))
 
-    def forward(self, tokens:dict, edge_index:torch.Tensor) -> torch.Tensor:
-        x = self.encoder(tokens['token_ids'], tokens['token_mask'], tokens['token_type_ids'])
-        x = x.last_hidden_state.flatten(start_dim=1)
+    def encode_inputs(self, tokens:torch.Tensor, batch_size=1024, encoding_dim=768):
+        token_loader = DataLoader(tokens, batch_size)
+        num_sentences = tokens.shape[0]
+        encodings = torch.empty((num_sentences, encoding_dim), dtype=torch.float)
+        for batch_idx, token_batch in enumerate(token_loader):
+            batch_encoding = self.encoder(token_batch[:,0,:],
+                                          token_batch[:,1,:],
+                                          token_batch[:,2,:]).last_hidden_state[:,0,:]
+            batch_start = batch_idx * batch_size
+            batch_end = min((batch_idx+1)*batch_size, num_sentences)
+            encodings[batch_start:batch_end,:] = batch_encoding
+        return encodings
+    
+    def save_input_encodings(self, encodings):
+        torch.save(encodings, 'data/input_encodings.pt')
+
+    def load_input_encodings(self):
+        encodings = torch.load('data/input_encodings.pt')
+        return encodings
+
+    def forward(self, x:torch.Tensor, edge_index:torch.Tensor, encode_tokens=False) -> torch.Tensor:
+        if encode_tokens:
+            assert x.dim() == 3
+            assert x.shape[1] == 3
+
+            x = self.encode_inputs(x)
+            self.save_input_encodings(x)
 
         for conv in self.conv_layers:
             x = conv(x, edge_index)
-            x = F.relu()
+            x = F.relu(x)
         
-        x = self.out(x)
+        return self.out(x)
 
 class LinkPredictor(Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers) -> None:
