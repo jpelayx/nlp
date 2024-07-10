@@ -69,7 +69,8 @@ class RelationsDS(InMemoryDataset):
 
         tokens = self.tokenizer(list(definitions),
                                 padding=True, 
-                                return_tensors='pt')
+                                return_tensors='pt', 
+                                add_special_tokens=True)
         token_ids = tokens.input_ids
         token_mask = tokens.attention_mask
         token_type_ids = tokens.token_type_ids 
