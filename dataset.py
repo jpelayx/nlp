@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 import os.path 
+import re
 
 class RelationsDS(InMemoryDataset):
     edge2id = {
@@ -55,10 +56,10 @@ class RelationsDS(InMemoryDataset):
         all_definitions = pd.concat([df['Definição_Synset'], df['Definição_Relacionada']])
 
         entities = pd.DataFrame({'ID': all_ids, 
-                                'Definição': all_definitions}).drop_duplicates()
+                                 'Definição': all_definitions}).drop_duplicates()
        
         ids = entities['ID'].to_numpy()
-        definitions = entities['Definição'].to_numpy()
+        definitions = entities.apply(self._compose_definition, axis=1)
         mapping = {name : i for i, name in enumerate(ids)}
 
         edge_index_i =  df['ID_Synset'].map(mapping).to_numpy()
@@ -83,6 +84,14 @@ class RelationsDS(InMemoryDataset):
         data.token_type_ids = token_type_ids
 
         return [data]
+
+    def _compose_definition(self, arg):
+        id, definition = arg
+        clean_id =  re.sub(r'\..\.[0-9][0-9]', '', id)
+        clean_id =  re.sub(r'_', ' ', clean_id)
+
+        new_def = f'the definition of {clean_id} is {definition}'
+        return new_def
 
 def select_by_edge_type(edge_type:str, data:RelationsDS) -> Data:
     edge2id = data.edge2id
