@@ -11,7 +11,7 @@ import numpy as np
 
 import os.path
 
-class Model(Module):
+class NodeEmbedder(Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers, encoder=None) -> None:
         super().__init__()
 
@@ -34,17 +34,17 @@ class Model(Module):
     def encode_inputs(self, tokens:torch.Tensor, batch_size=1024, encoding_dim=768, verbose=False):
         token_loader = DataLoader(tokens, batch_size)
         num_batches = len(token_loader)
-        num_sentences = tokens.shape[0]
-        encodings = torch.empty((num_sentences, encoding_dim), dtype=torch.float)
+        encodings = None
         for batch_idx, token_batch in enumerate(token_loader):
-            if verbose:
+            if verbose and (batch_idx % 10*batch_size == 0):
                 print(f'Batch {batch_idx}/{num_batches}')
             batch_encoding = self.encoder(token_batch[:,0,:],
                                           token_batch[:,1,:],
                                           token_batch[:,2,:]).last_hidden_state[:,0,:]
-            batch_start = batch_idx * batch_size
-            batch_end = min((batch_idx+1)*batch_size, num_sentences)
-            encodings[batch_start:batch_end,:] = batch_encoding
+            if encodings is None: 
+                encodings = batch_encoding
+            else:
+                encodings = torch.concat([encodings, batch_encoding])
         return encodings
     
     def save_input_encodings(self, encodings, path=None):
@@ -57,7 +57,7 @@ class Model(Module):
             path = self._default_encoding_path
         assert os.path.exists(path)
 
-        encodings = torch.load('data/input_encodings.pt')
+        encodings = torch.load(path)
         return encodings
 
     def forward(self, x:torch.Tensor, edge_index:torch.Tensor, encode_tokens=False) -> torch.Tensor:
@@ -92,3 +92,18 @@ class LinkPredictor(Module):
             x = F.relu(x)
         x = self.linear_layers[-1](x)
         return torch.sigmoid(x)
+
+class Model(Module):
+    def __init__(self, node_embedder, link_predictor) -> None:
+        super().__init__()
+        self.node_embedder = node_embedder
+        self.link_predictor = link_predictor
+    def forward(self, x, pos_edge_index, neg_edge_index):
+        emb = self.node_embedder(x, pos_edge_index)
+        pos_pred = self.link_predictor(emb[pos_edge_index[0]],
+                                       emb[pos_edge_index[1]])
+        neg_pred = self.link_predictor(emb[neg_edge_index[0]],
+                                       emb[neg_edge_index[1]])
+        pred = torch.concat([pos_pred, neg_pred])
+        labels = torch.concat([torch.ones_like(pos_pred), torch.zeros_like(neg_pred)])
+        return pred, labels

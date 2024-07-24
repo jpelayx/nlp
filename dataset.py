@@ -97,12 +97,12 @@ def select_by_edge_type(edge_type:str, data:RelationsDS) -> Data:
     edge2id = data.edge2id
     data = data[0]
 
-    edge_index = data.edge_index[:, data.edge_type == edge2id['edge_type']]
+    edge_index = data.edge_index[:, data.edge_type == edge2id[edge_type]]
 
-    nodes_index = torch.concat([edge_index[0,:], edge_index[1,:]]).unique()
-    token_ids = data.token_ids[nodes_index]
-    token_mask = data.token_mask[nodes_index]
-    token_type_ids = data.token_type_ids[nodes_index]
+    # nodes_index = torch.concat([edge_index[0,:], edge_index[1,:]]).unique()
+    token_ids = data.token_ids #[nodes_index]
+    token_mask = data.token_mask #[nodes_index]
+    token_type_ids = data.token_type_ids #[nodes_index]
 
     new_data = Data()
     new_data.edge_index = edge_index
