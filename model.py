@@ -9,6 +9,8 @@ from transformers import BertModel
 
 import numpy as np
 
+import os.path
+
 class Model(Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers, encoder=None) -> None:
         super().__init__()
@@ -17,6 +19,7 @@ class Model(Module):
             self.encoder = BertModel.from_pretrained('bert-base-uncased')
         for param in self.encoder.parameters():
             param.requires_grad = False
+        self._default_encoding_path = 'data/input_encoding.pt'
 
         self.num_layers = num_layers
         self.conv_layers = ModuleList()
@@ -28,11 +31,14 @@ class Model(Module):
             nn.Linear(hidden_dim, hidden_dim),
             nn.Linear(hidden_dim, output_dim))
 
-    def encode_inputs(self, tokens:torch.Tensor, batch_size=1024, encoding_dim=768):
+    def encode_inputs(self, tokens:torch.Tensor, batch_size=1024, encoding_dim=768, verbose=False):
         token_loader = DataLoader(tokens, batch_size)
+        num_batches = len(token_loader)
         num_sentences = tokens.shape[0]
         encodings = torch.empty((num_sentences, encoding_dim), dtype=torch.float)
         for batch_idx, token_batch in enumerate(token_loader):
+            if verbose:
+                print(f'Batch {batch_idx}/{num_batches}')
             batch_encoding = self.encoder(token_batch[:,0,:],
                                           token_batch[:,1,:],
                                           token_batch[:,2,:]).last_hidden_state[:,0,:]
@@ -41,10 +47,16 @@ class Model(Module):
             encodings[batch_start:batch_end,:] = batch_encoding
         return encodings
     
-    def save_input_encodings(self, encodings):
-        torch.save(encodings, 'data/input_encodings.pt')
+    def save_input_encodings(self, encodings, path=None):
+        if path is None:
+            path = self._default_encoding_path
+        torch.save(encodings, path)
 
-    def load_input_encodings(self):
+    def load_input_encodings(self, path=None):
+        if path is None:
+            path = self._default_encoding_path
+        assert os.path.exists(path)
+
         encodings = torch.load('data/input_encodings.pt')
         return encodings
 
