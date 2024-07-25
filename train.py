@@ -64,7 +64,7 @@ def val(model, data):
     model.eval()
     link_pred.eval()
     with torch.no_grad():
-        pred, labels = model(data.x, data.pos_val_edge_index, data.neg_val_edge_index)
+        pred, labels = model(data.x, data.pos_val_edge_index, data.pos_val_edge_index, data.neg_val_edge_index)
         loss = F.binary_cross_entropy_with_logits(pred, labels)
 
         labels = labels.to('cpu')
@@ -77,7 +77,7 @@ def test(model, data):
     model.eval()
     link_pred.eval()
     with torch.no_grad():
-        pred, labels = model(data.x, data.pos_test_edge_index, data.neg_test_edge_index)
+        pred, labels = model(data.x, data.pos_val_edge_index, data.pos_test_edge_index, data.neg_test_edge_index)
         loss = F.binary_cross_entropy_with_logits(pred, labels)
 
         labels = labels.to('cpu')
@@ -106,7 +106,7 @@ if __name__ == '__main__':
                               output_dim=1,
                               num_layers=3).to(device)
     model = Model(node_embedder, link_pred)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)   
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)   
 
     encoding_path = './data/input_encoding.pt'
     if not os.path.exists(encoding_path):
@@ -124,9 +124,9 @@ if __name__ == '__main__':
 
     train_epochs = 500 
     num_train_links = g.pos_train_edge_index.shape[1]
-    batch_size = args.batch_size
-    if not batch_size is None:
-        batch_size = int(num_train_links/batch_size)
+    num_batches = args.num_batches
+    if not num_batches is None:
+        batch_size = int(num_train_links/num_batches)
     for epoch in range(train_epochs):
         train_loss = train(model, optimizer, g, batch_size=batch_size)
         val_loss, val_precision, val_recall = val(model, g)
