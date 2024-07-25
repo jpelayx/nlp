@@ -28,16 +28,37 @@ def split_data(g):
     g.neg_test_edge_index = torch.stack([src[train_size+val_size:], neg[train_size+val_size:]])
     return g
 
-def train(model, optimizer, data):
+def train(model, optimizer, data, batch_size=None):
     model.train()
     optimizer.zero_grad()
-
-    pred, labels = model(data.x, data.pos_train_edge_index, data.neg_train_edge_index)
-
-    loss = F.binary_cross_entropy_with_logits(pred, labels)
-    loss.backward()
-    optimizer.step()
-    return loss.item()
+    if batch_size is None:
+        pred, labels = model(data.x, 
+                             data.pos_train_edge_index, 
+                             data.pos_train_edge_index, 
+                             data.neg_train_edge_index)
+        loss = F.binary_cross_entropy_with_logits(pred, labels)
+        loss.backward()
+        optimizer.step()
+        return loss.item()
+    else:
+        losses = None
+        edge_index = data.pos_train_edge_index
+        link_loader = DataLoader(torch.arange(0, len(edge_index), dtype=torch.long, device=device),
+                                 batch_size=batch_size,
+                                 shuffle=True)
+        for link_idxs in link_loader:
+            pred, labels = model(data.x, 
+                                 edge_index,
+                                 data.pos_train_edge_index[link_idxs], 
+                                 data.neg_train_edge_index[link_idxs])
+            loss = F.binary_cross_entropy_with_logits(pred, labels)
+            loss.backward()
+            optimizer.step()
+            if losses is None:
+                losses = torch.tensor([loss.item()])
+            else:
+                losses = torch.concat([losses, torch.tensor([loss.item()])])
+        return losses.mean()
 
 def val(model, data):
     model.eval()
@@ -86,7 +107,7 @@ if __name__ == '__main__':
         print("Encoding input...")
         tokens = torch.stack([g.token_ids, g.token_mask, g.token_type_ids], dim=1)
         with torch.no_grad():
-            node_encodings = node_embedder.encode_inputs(tokens, verbose=True) 
+            node_encodings = node_embedder.encode_inputs(tokens, batch_size=64, verbose=True) 
         node_embedder.save_input_encodings(node_encodings)
     else:
         node_encodings = node_embedder.load_input_encodings(encoding_path).to(device)
@@ -98,7 +119,7 @@ if __name__ == '__main__':
     train_epochs = 500 
     num_train_links = g.pos_train_edge_index.shape[1]
     for epoch in range(train_epochs):
-        train_loss = train(model, optimizer, g)
+        train_loss = train(model, optimizer, g, batch_size=int(num_train_links/5))
         val_loss, val_precision, val_recall = val(model, g)
         # print(f'Epoch {epoch+1}/{train_epochs}, train loss: {train_loss}, val loss: {val_loss}, val f1: {val_f1}')
         print(f'{epoch+1},{train_loss},{val_loss},{val_precision},{val_recall}')

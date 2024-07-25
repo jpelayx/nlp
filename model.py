@@ -98,12 +98,12 @@ class Model(Module):
         super().__init__()
         self.node_embedder = node_embedder
         self.link_predictor = link_predictor
-    def forward(self, x, pos_edge_index, neg_edge_index):
-        emb = self.node_embedder(x, pos_edge_index)
-        pos_pred = self.link_predictor(emb[pos_edge_index[0]],
-                                       emb[pos_edge_index[1]])
-        neg_pred = self.link_predictor(emb[neg_edge_index[0]],
-                                       emb[neg_edge_index[1]])
+    def forward(self, x, edge_index, pos_target_links, neg_target_links):
+        emb = self.node_embedder(x, edge_index)
+        pos_pred = self.link_predictor(emb[pos_target_links[0]],
+                                       emb[pos_target_links[1]])
+        neg_pred = self.link_predictor(emb[neg_target_links[0]],
+                                       emb[neg_target_links[1]])
         pred = torch.concat([pos_pred, neg_pred])
         labels = torch.concat([torch.ones_like(pos_pred), torch.zeros_like(neg_pred)])
         return pred, labels
