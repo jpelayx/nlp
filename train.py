@@ -87,6 +87,12 @@ def test(model, data):
                 recall_score(labels, pred, zero_division=0.0))
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num_batches', '-nb', type=int, default=None)
+    args = parser.parse_args()
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     data = RelationsDS(root='./data').to(device)
     g = select_by_edge_type('Hypernyms', data)
@@ -118,8 +124,11 @@ if __name__ == '__main__':
 
     train_epochs = 500 
     num_train_links = g.pos_train_edge_index.shape[1]
+    batch_size = args.batch_size
+    if not batch_size is None:
+        batch_size = int(num_train_links/batch_size)
     for epoch in range(train_epochs):
-        train_loss = train(model, optimizer, g, batch_size=int(num_train_links/5))
+        train_loss = train(model, optimizer, g, batch_size=batch_size)
         val_loss, val_precision, val_recall = val(model, g)
         # print(f'Epoch {epoch+1}/{train_epochs}, train loss: {train_loss}, val loss: {val_loss}, val f1: {val_f1}')
         print(f'{epoch+1},{train_loss},{val_loss},{val_precision},{val_recall}')
