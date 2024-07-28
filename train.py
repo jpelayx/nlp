@@ -81,10 +81,11 @@ def test(model, data):
         pred, labels = model(data.x, data.pos_val_edge_index, data.pos_test_edge_index, data.neg_test_edge_index)
         loss = F.binary_cross_entropy_with_logits(pred, labels)
 
-        labels = labels.to('cpu')
-        pred = pred.to('cpu')
+        labels = labels.to('cpu').numpy()
+        pred = pred.to('cpu').numpy()
+        print(labels.shape, pred.shape)	
         # pred = binarize(pred, threshold=LABEL_TRESHOLD)
-        return labels, pred
+        return labels.flatten(), pred.flatten()
 
 if __name__ == '__main__':
     import pandas as pd
