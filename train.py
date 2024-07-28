@@ -37,7 +37,7 @@ def train(model, optimizer, data, batch_size=None):
                              data.pos_train_edge_index, 
                              data.neg_train_edge_index)
         loss = F.binary_cross_entropy_with_logits(pred, labels)
-        loss.backward()
+        loss.backward()    
         optimizer.step()
         return loss.item()
     else:
@@ -71,7 +71,8 @@ def val(model, data):
         pred = binarize(pred.to('cpu'), threshold=LABEL_TRESHOLD)
         return (loss.item(), 
                 precision_score(labels, pred, zero_division=0.0), 
-                recall_score(labels, pred, zero_division=0.0))
+                recall_score(labels, pred, zero_division=0.0),
+                f1_score(labels, pred, zero_division=0.0))
 
 def test(model, data):
     model.eval()
@@ -81,12 +82,12 @@ def test(model, data):
         loss = F.binary_cross_entropy_with_logits(pred, labels)
 
         labels = labels.to('cpu')
-        pred = binarize(pred.to('cpu'), threshold=LABEL_TRESHOLD)
-        return (loss.item(), 
-                precision_score(labels, pred, zero_division=0.0), 
-                recall_score(labels, pred, zero_division=0.0))
+        pred = pred.to('cpu')
+        # pred = binarize(pred, threshold=LABEL_TRESHOLD)
+        return labels, pred
 
 if __name__ == '__main__':
+    import pandas as pd
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -125,15 +126,26 @@ if __name__ == '__main__':
     train_epochs = 500 
     num_train_links = g.pos_train_edge_index.shape[1]
     num_batches = args.num_batches
+    max_f1 = 0
     if not num_batches is None:
         batch_size = int(num_train_links/num_batches)
     for epoch in range(train_epochs):
         train_loss = train(model, optimizer, g, batch_size=batch_size)
-        val_loss, val_precision, val_recall = val(model, g)
+        val_loss, val_precision, val_recall, val_f1 = val(model, g)
+        if val_f1 > max_f1:
+            max_f1 = val_f1
+            torch.save(model.state_dict(), '.best_model.pth')
         # print(f'Epoch {epoch+1}/{train_epochs}, train loss: {train_loss}, val loss: {val_loss}, val f1: {val_f1}')
         print(f'{epoch+1},{train_loss},{val_loss},{val_precision},{val_recall}')
-    test_loss, test_precision, test_recall = test(model, g)
-    print(f'Test loss: {test_loss}, test precision: {test_precision}, test recall: {test_recall}')
+
+    best_model = Model(node_embedder, link_pred)
+    best_model.load_state_dict(torch.load('.best_model.pth'))    
+    best_model = best_model.to(device)
+    y_true, y_pred = test(best_model, g)
+    results = pd.DataFrame({'y_true': y_true, 'y_pred':y_pred})
+    results.to_csv('results.csv')
+
+    # print(f'Test loss: {test_loss}, test precision: {test_precision}, test recall: {test_recall}')
 
 
 
