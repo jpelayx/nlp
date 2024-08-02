@@ -112,7 +112,8 @@ if __name__ == '__main__':
                               num_layers=3).to(device)
     model = Model(node_embedder, link_pred)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)  
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[180], gamma=0.8) 
+    # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[180], gamma=0.8) 
+    scheduler = None
 
     encoding_path = './data/input_encoding.pt'
     if not os.path.exists(encoding_path):
