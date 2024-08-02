@@ -29,6 +29,7 @@ class NodeEmbedder(Module):
 
         self.out = Sequential(
             nn.Linear(hidden_dim, hidden_dim),
+            nn.Dropout(0.3),
             nn.Linear(hidden_dim, output_dim))
 
     def encode_inputs(self, tokens:torch.Tensor, batch_size=1024, encoding_dim=768, verbose=False):
@@ -71,6 +72,7 @@ class NodeEmbedder(Module):
         for conv in self.conv_layers:
             x = conv(x, edge_index)
             x = F.relu(x)
+            x = F.dropout(x, 0.3, self.training)
         
         return self.out(x)
 
@@ -90,6 +92,7 @@ class LinkPredictor(Module):
         for linear in self.linear_layers[:-1]:
             x = linear(x)
             x = F.relu(x)
+            x = F.dropout(x, 0.3, self.training)
         x = self.linear_layers[-1](x)
         return torch.sigmoid(x)
 
