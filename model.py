@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from torch.nn import Module, ModuleList, Sequential
 from torch.utils.data import DataLoader
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, GATConv
 from transformers import BertModel
 
 import numpy as np
@@ -23,9 +23,9 @@ class NodeEmbedder(Module):
 
         self.num_layers = num_layers
         self.conv_layers = ModuleList()
-        self.conv_layers.append(GCNConv(input_dim, hidden_dim))
+        self.conv_layers.append(GATConv(input_dim, hidden_dim))
         for _ in range(num_layers-1):
-            self.conv_layers.append(GCNConv(hidden_dim, hidden_dim))
+            self.conv_layers.append(GATConv(hidden_dim, hidden_dim))
 
         self.out = Sequential(
             nn.Linear(hidden_dim, hidden_dim),
