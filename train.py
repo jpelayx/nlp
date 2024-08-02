@@ -28,7 +28,7 @@ def split_data(g):
     g.neg_test_edge_index = torch.stack([src[train_size+val_size:], neg[train_size+val_size:]])
     return g
 
-def train(model, optimizer, data, batch_size=None):
+def train(model, optimizer, data, batch_size=None, scheduler=None):
     model.train()
     optimizer.zero_grad()
     if batch_size is None:
@@ -58,7 +58,9 @@ def train(model, optimizer, data, batch_size=None):
                 losses = torch.tensor([loss.item()])
             else:
                 losses = torch.concat([losses, torch.tensor([loss.item()])])
-        return losses.mean()
+        if not scheduler is None:
+            scheduler.step()
+        return losses.mean().item()
 
 def val(model, data):
     model.eval()
@@ -109,7 +111,8 @@ if __name__ == '__main__':
                               output_dim=1,
                               num_layers=3).to(device)
     model = Model(node_embedder, link_pred)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)   
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)  
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[180], gamma=0.1) 
 
     encoding_path = './data/input_encoding.pt'
     if not os.path.exists(encoding_path):
@@ -134,7 +137,7 @@ if __name__ == '__main__':
     if not num_batches is None:
         batch_size = int(num_train_links/num_batches)
     for epoch in range(train_epochs):
-        train_loss = train(model, optimizer, g, batch_size=batch_size)
+        train_loss = train(model, optimizer, g, batch_size=batch_size, scheduler=scheduler)
         val_loss, val_precision, val_recall, val_f1 = val(model, g)
         train_losses['train loss'].append(train_loss)
         train_losses['val loss'].append(val_loss)
