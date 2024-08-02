@@ -93,6 +93,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_batches', '-nb', type=int, default=None)
+    parser.add_argument('--name', '-n', type=str, default=None)
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -128,11 +129,15 @@ if __name__ == '__main__':
     num_train_links = g.pos_train_edge_index.shape[1]
     num_batches = args.num_batches
     max_f1 = 0
+    train_losses = {'train loss':[], 'val loss':[]}
+    experiment_name = args.name if not args.name is None else ''
     if not num_batches is None:
         batch_size = int(num_train_links/num_batches)
     for epoch in range(train_epochs):
         train_loss = train(model, optimizer, g, batch_size=batch_size)
         val_loss, val_precision, val_recall, val_f1 = val(model, g)
+        train_losses['train loss'].append(train_loss)
+        train_losses['val loss'].append(val_loss)
         if val_f1 > max_f1:
             max_f1 = val_f1
             torch.save(model.state_dict(), '.best_model.pth')
@@ -144,7 +149,9 @@ if __name__ == '__main__':
     best_model = best_model.to(device)
     y_true, y_pred = test(best_model, g)
     results = pd.DataFrame({'y_true': y_true, 'y_pred':y_pred})
-    results.to_csv('results.csv')
+    results.to_csv(f'{experiment_name}-results.csv')
+    losses = pd.DataFrame(train_losses)
+    losses.to_csv(f'{experiment_name}-train_losses.csv')
 
     # print(f'Test loss: {test_loss}, test precision: {test_precision}, test recall: {test_recall}')
 
