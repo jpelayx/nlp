@@ -23,9 +23,9 @@ class NodeEmbedder(Module):
 
         self.num_layers = num_layers
         self.conv_layers = ModuleList()
-        self.conv_layers.append(GATConv(input_dim, hidden_dim))
+        self.conv_layers.append(GATConv(input_dim, int(hidden_dim/2), heads=2))
         for _ in range(num_layers-1):
-            self.conv_layers.append(GATConv(hidden_dim, hidden_dim))
+            self.conv_layers.append(GATConv(hidden_dim, int(hidden_dim/2), heads=2))
 
         self.out = Sequential(
             nn.Linear(hidden_dim, hidden_dim),
