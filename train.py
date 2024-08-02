@@ -112,7 +112,7 @@ if __name__ == '__main__':
                               num_layers=3).to(device)
     model = Model(node_embedder, link_pred)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)  
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[180], gamma=0.1) 
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[180], gamma=0.8) 
 
     encoding_path = './data/input_encoding.pt'
     if not os.path.exists(encoding_path):
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     
     g = split_data(g)
 
-    train_epochs = 500 
+    train_epochs = 750 
     num_train_links = g.pos_train_edge_index.shape[1]
     num_batches = args.num_batches
     max_f1 = 0
