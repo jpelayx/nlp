@@ -1,5 +1,7 @@
 import torch
 from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.utils import structured_negative_sampling
+from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer
 
 import pandas as pd 
@@ -10,8 +12,8 @@ import re
 
 class RelationsDS(InMemoryDataset):
     edge2id = {
-        'Hypernyms': 0,
-        'Holonyms': 1
+        'Hypernyms': 1,
+        'Holonyms': 2
     }
 
     def __init__(self, root, tokenizer=None, transform=None, pre_transform=None, pre_filter=None):
@@ -21,8 +23,8 @@ class RelationsDS(InMemoryDataset):
             self.tokenizer = tokenizer
         
         super().__init__(root, transform, pre_transform, pre_filter)
-
         self.load(self.processed_paths[0])
+        self.num_nodes = self[0].token_ids.shape[0]
 
     @property
     def raw_file_names(self):
@@ -66,7 +68,7 @@ class RelationsDS(InMemoryDataset):
         edge_index_j =  df['ID_Relacionada'].map(mapping).to_numpy()
         edge_index = np.stack([edge_index_i, edge_index_j])
 
-        edge_type = df['Relacao'].map(self.edge2id).to_numpy()
+        edge_attr = df['Relacao'].map(self.edge2id).to_numpy()
 
         tokens = self.tokenizer(list(definitions),
                                 padding=True, 
@@ -78,7 +80,7 @@ class RelationsDS(InMemoryDataset):
 
         data = Data()
         data.edge_index = torch.tensor(edge_index, dtype=torch.long)
-        data.edge_type = torch.tensor(edge_type)
+        data.edge_attr = torch.tensor(edge_attr, dtype=torch.long)
         data.token_ids = token_ids
         data.token_mask = token_mask
         data.token_type_ids = token_type_ids
@@ -111,3 +113,53 @@ def select_by_edge_type(edge_type:str, data:RelationsDS) -> Data:
     new_data.token_type_ids = token_type_ids
 
     return new_data 
+
+def add_self_loops(data:Data, num_nodes:int) -> Data:
+    device = data.edge_attr.device
+    edge_index_i, edge_index_j = data.edge_index
+    edge_index_i = torch.cat([edge_index_i, torch.arange(0, num_nodes, dtype=torch.int64, device=device)]) 
+    edge_index_j = torch.cat([edge_index_j, torch.arange(0, num_nodes, dtype=torch.int64, device=device)]) 
+    edge_index = torch.stack([edge_index_i, edge_index_j])
+
+    edge_attr = data.edge_attr
+    edge_attr = torch.cat([edge_attr, torch.zeros(num_nodes, device=device)])
+    # edge2id['ID'] == 0
+
+    data.edge_index = edge_index
+    data.edge_attr = edge_attr
+
+    return data 
+
+def split_data_stratified(g, num_nodes, add_self_loops=True):
+    device = g.edge_index.device
+    src, tar, neg = structured_negative_sampling(g.edge_index,
+                                                 contains_neg_self_loops=False)
+    g.pos_samples = torch.stack([src, tar])
+    g.neg_samples = torch.stack([src, neg])
+    
+    mask = torch.arange(src.shape[0])
+    labels = g.edge_attr.to('cpu')
+    train_mask, test_mask = train_test_split(mask, test_size=0.2, stratify=labels)
+    train_mask, val_mask = train_test_split(train_mask, test_size=0.2, stratify=labels[train_mask])
+    g.train_mask = train_mask.to(device)
+    g.val_mask = val_mask.to(device)
+    g.test_mask = test_mask.to(device)
+
+    if add_self_loops:    
+        edge_index_i, edge_index_j = src[train_mask], tar[train_mask]
+        edge_index_i = torch.cat([edge_index_i, torch.arange(num_nodes, dtype=torch.int64, device=device)]) 
+        edge_index_j = torch.cat([edge_index_j, torch.arange(num_nodes, dtype=torch.int64, device=device)]) 
+        edge_index = torch.stack([edge_index_i, edge_index_j])
+        
+        edge_attr = g.edge_attr[train_mask]
+        edge_attr = torch.cat([edge_attr, torch.zeros(num_nodes, dtype=torch.long, device=device)])
+    else:
+        edge_index = g.edge_index[:,train_mask]
+        edge_attr  = g.edge_attr[train_mask]
+    
+    g.edge_index = edge_index
+    g.edge_attr  = edge_attr
+
+    return g
+
+    

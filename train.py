@@ -1,10 +1,9 @@
-from dataset import RelationsDS, select_by_edge_type
+from dataset import RelationsDS, select_by_edge_type, add_self_loops, split_data_stratified
 from model import NodeEmbedder, LinkPredictor, Model
 
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from torch_geometric.utils import structured_negative_sampling
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.preprocessing import binarize
 
@@ -12,45 +11,32 @@ import os.path
 
 LABEL_TRESHOLD = 0.5
 
-def split_data(g):
-    idx = torch.randperm(g.edge_index.shape[1])
-    g.edge_index = g.edge_index[:,idx]
-    src, tar, neg = structured_negative_sampling(g.edge_index)
-    train_size = int(g.edge_index.shape[1] * 0.8)
-    val_size = int(g.edge_index.shape[1] * 0.1)
-    test_size = g.edge_index.shape[1] - train_size - val_size
-
-    g.pos_train_edge_index = torch.stack([src[:train_size], tar[:train_size]])
-    g.pos_val_edge_index = torch.stack([src[train_size:train_size+val_size], tar[train_size:train_size+val_size]])
-    g.pos_test_edge_index = torch.stack([src[train_size+val_size:], tar[train_size+val_size:]])
-    g.neg_train_edge_index = torch.stack([src[:train_size], neg[:train_size]])
-    g.neg_val_edge_index = torch.stack([src[train_size:train_size+val_size], neg[train_size:train_size+val_size]])
-    g.neg_test_edge_index = torch.stack([src[train_size+val_size:], neg[train_size+val_size:]])
-    return g
 
 def train(model, optimizer, data, batch_size=None, scheduler=None):
     model.train()
     optimizer.zero_grad()
     if batch_size is None:
         pred, labels = model(data.x, 
-                             data.pos_train_edge_index, 
-                             data.pos_train_edge_index, 
-                             data.neg_train_edge_index)
+                             data.edge_index, 
+                             data.edge_attr,
+                             data.pos_samples[data.train_mask], 
+                             data.neg_samples[data.train_mask]) 
         loss = F.binary_cross_entropy_with_logits(pred, labels)
         loss.backward()    
         optimizer.step()
         return loss.item()
     else:
         losses = None
-        edge_index = data.pos_train_edge_index
-        link_loader = DataLoader(torch.arange(0, len(edge_index), dtype=torch.long, device=device),
+        link_loader = DataLoader(data.train_mask,
                                  batch_size=batch_size,
                                  shuffle=True)
         for link_idxs in link_loader:
             pred, labels = model(data.x, 
-                                 edge_index,
-                                 data.pos_train_edge_index[link_idxs], 
-                                 data.neg_train_edge_index[link_idxs])
+                                 data.edge_index,
+                                 data.edge_attr,
+                                 data.pos_samples[link_idxs], 
+                                 data.neg_samples[link_idxs])
+            print('.')
             loss = F.binary_cross_entropy_with_logits(pred, labels)
             loss.backward()
             optimizer.step()
@@ -66,7 +52,11 @@ def val(model, data):
     model.eval()
     link_pred.eval()
     with torch.no_grad():
-        pred, labels = model(data.x, data.pos_val_edge_index, data.pos_val_edge_index, data.neg_val_edge_index)
+        pred, labels = model(data.x, 
+                             data.edge_index,
+                             data.edge_attr, 
+                             data.pos_samples[data.val_mask], 
+                             data.neg_samples[data.val_mask])
         loss = F.binary_cross_entropy_with_logits(pred, labels)
 
         labels = labels.to('cpu')
@@ -80,8 +70,12 @@ def test(model, data):
     model.eval()
     link_pred.eval()
     with torch.no_grad():
-        pred, labels = model(data.x, data.pos_val_edge_index, data.pos_test_edge_index, data.neg_test_edge_index)
-        loss = F.binary_cross_entropy_with_logits(pred, labels)
+        pred, labels = model(data.x, 
+                             data.edge_index,
+                             data.edge_attr, 
+                             data.pos_samples[data.test_mask], 
+                             data.neg_samples[data.test_mask])
+        # loss = F.binary_cross_entropy_with_logits(pred, labels)
 
         labels = labels.to('cpu').numpy()
         pred = pred.to('cpu').numpy()
@@ -94,26 +88,28 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num_batches', '-nb', type=int, default=None)
+    parser.add_argument('--batch_size', '-b', type=int, default=None)
+    parser.add_argument('--epochs', '-e', type=int, default=500)
     parser.add_argument('--name', '-n', type=str, default=None)
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     data = RelationsDS(root='./data').to(device)
-    g = select_by_edge_type('Hypernyms', data)
+    g = data[0]
 
     node_embedder = NodeEmbedder(input_dim=768,
                                  hidden_dim=256,
                                  output_dim=256,
+                                 num_heads=1,
                                  num_layers=2).to(device)
     link_pred = LinkPredictor(input_dim=256, 
                               hidden_dim=128,
                               output_dim=1,
                               num_layers=3).to(device)
     model = Model(node_embedder, link_pred)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)  
-    # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[180], gamma=0.8) 
-    scheduler = None
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[300], gamma=0.8) 
+    # scheduler = None
 
     encoding_path = './data/input_encoding.pt'
     if not os.path.exists(encoding_path):
@@ -127,25 +123,23 @@ if __name__ == '__main__':
         print('Loaded pre-computed BERT encodings.')
     g.x = node_encodings 
     
-    g = split_data(g)
+    g = split_data_stratified(g, data.num_nodes) # create neg samples and train/val/test splits 
+    g.edge_attr = F.one_hot(g.edge_attr)
 
-    train_epochs = 750 
-    num_train_links = g.pos_train_edge_index.shape[1]
-    num_batches = args.num_batches
+    train_epochs = args.epochs
+    batch_size = args.batch_size
     max_f1 = 0
-    train_losses = {'train loss':[], 'val loss':[]}
+    train_losses = {'epoch':[],'train loss':[], 'val loss':[]}
     experiment_name = args.name if not args.name is None else ''
-    if not num_batches is None:
-        batch_size = int(num_train_links/num_batches)
     for epoch in range(train_epochs):
         train_loss = train(model, optimizer, g, batch_size=batch_size, scheduler=scheduler)
         val_loss, val_precision, val_recall, val_f1 = val(model, g)
+        train_losses['epoch'].append(epoch)
         train_losses['train loss'].append(train_loss)
         train_losses['val loss'].append(val_loss)
         if val_f1 > max_f1:
             max_f1 = val_f1
             torch.save(model.state_dict(), '.best_model.pth')
-        # print(f'Epoch {epoch+1}/{train_epochs}, train loss: {train_loss}, val loss: {val_loss}, val f1: {val_f1}')
         print(f'{epoch+1},{train_loss},{val_loss},{val_precision},{val_recall}')
 
     best_model = Model(node_embedder, link_pred)

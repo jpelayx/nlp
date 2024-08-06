@@ -1,0 +1,1216 @@
+,ID,Definição
+123,entrance.n.03,the act of entering
+127,entree.n.04,the act of entering
+3618,laser-assisted_subepithelial_keratomileusis.n.01,a refractive surgery procedure that reshapes the cornea
+3620,laser-assisted_in_situ_keratomileusis.n.01,a refractive surgery procedure that reshapes the cornea
+3896,fullback.n.02,(American football) the position of a back on a football team
+3898,halfback.n.02,(American football) the position of a back on a football team
+3906,guard.n.09,(American football) a position on the line of scrimmage
+3908,tackle.n.04,(American football) a position on the line of scrimmage
+3910,end.n.14,(American football) a position on the line of scrimmage
+4040,double_cross.n.01,an act of betrayal
+4041,sellout.n.01,an act of betrayal
+6192,punishment.n.01,the act of punishing
+6198,discipline.n.05,the act of punishing
+6740,fun.n.03,violent and excited activity
+6741,sin.n.06,violent and excited activity
+7009,togaviridae.n.01,a family of arboviruses carried by arthropods
+7013,flaviviridae.n.01,a family of arboviruses carried by arthropods
+7018,arenaviridae.n.01,a family of arborviruses carried by arthropods
+7020,rhabdoviridae.n.01,a family of arborviruses carried by arthropods
+7024,reoviridae.n.01,a family of arboviruses carried by arthropods
+7108,bacteria_family.n.01,a family of bacteria
+7110,bacteria_genus.n.01,a genus of bacteria
+7112,bacteria_species.n.01,a species of bacteria
+7201,genus_thiobacillus.n.01,a genus of bacteria
+7208,genus_spirillum.n.01,a genus of bacteria
+7213,genus_vibrio.n.01,a genus of bacteria
+7249,genus_escherichia.n.01,a genus of bacteria
+7254,genus_klebsiella.n.01,a genus of bacteria
+7258,genus_salmonella.n.01,a genus of bacteria
+7269,genus_shigella.n.01,a genus of bacteria
+7274,genus_erwinia.n.01,a genus of bacteria
+7331,mycobacteriaceae.n.01,a family of bacteria
+7368,genus_diplococcus.n.01,a genus of bacteria
+7373,genus_streptococcus.n.01,a genus of bacteria
+7377,streptococcus_anhemolyticus.n.01,a species of bacteria
+7407,planktonic_algae.n.01,unicellular algae
+7603,genus_sargassum.n.01,a genus of protoctist
+7653,genus_spirogyra.n.01,a genus of protoctist
+7683,desmidiaceae.n.01,unicellular algae
+7685,desmidium.n.01,a genus of protoctist
+7696,gigartinaceae.n.01,a family of protoctist
+7698,chondrus.n.01,a genus of protoctist
+7702,rhodymeniaceae.n.01,a family of protoctist
+7708,bangiaceae.n.01,a family of protoctist
+7710,porphyra.n.01,a genus of protoctist
+7725,genus_noctiluca.n.01,a genus of protoctist
+7783,coccidia.n.01,an order in the subclass Telosporidia
+7791,gregarinida.n.01,an order in the subclass Telosporidia
+7795,haemosporidia.n.01,an order in the subclass Telosporidia
+7811,genus_leucocytozoon.n.01,a genus of protoctist
+7835,actinomyxidia.n.01,parasites of worms
+7837,actinomyxidian.n.01,parasites of worms
+7839,mycrosporidia.n.01,an order in the subclass Cnidosporidia
+7843,myxosporidia.n.01,an order in the subclass Cnidosporidia
+7943,hypentelium.n.01,a genus of fish in the family Catostomidae
+7946,maxostoma.n.01,a genus of fish in the family Catostomidae
+7955,fundulus.n.01,killifish
+7961,genus_rivulus.n.01,killifish
+8013,krypterophaneron.n.01,a genus of fish in the family Anomalopidae
+8015,photoblepharon.n.01,a genus of fish in the family Anomalopidae
+8030,capros.n.01,a genus of fish in the family Caproidae
+8034,antigonia.n.01,a genus of fish in the family Caproidae
+8152,cephalochordata.n.01,lancelets
+8156,amphioxidae.n.01,lancelets
+8474,aetobatus.n.01,a genus of Myliobatidae
+8478,rhinoptera.n.01,a genus of Myliobatidae
+8535,genus_archaeopteryx.n.01,a genus of fossil birds
+8539,genus_sinornis.n.01,a genus of fossil birds
+8717,pooecetes.n.01,a genus of Fringillidae
+8789,pinicola.n.01,a genus of Fringillidae
+8802,pipilo.n.01,towhees
+8806,chlorura.n.01,towhees
+8890,pyrocephalus.n.01,a genus of Tyrannidae
+8931,ant_thrush.n.01,a kind of antbird
+8933,thamnophilus.n.01,a genus of Formicariidae
+8937,hylophylax.n.01,a genus of Formicariidae
+8939,spotted_antbird.n.01,a kind of antbird
+8952,muscivora.n.01,a genus of Tyrannidae
+9016,phoenicurus.n.01,Old World thrushes
+9028,erithacus.n.01,Old World thrushes
+9061,acrocephalus.n.01,a genus of Sylviidae
+9064,prinia.n.01,a genus of Sylviidae
+9087,setophaga.n.01,a genus of Parulidae
+9091,dendroica.n.01,a genus of Parulidae
+9197,acridotheres.n.01,mynas
+9201,gracula.n.01,mynas
+9365,psaltriparus.n.01,a genus of Paridae
+9369,chamaea.n.01,a genus of Paridae
+9373,auriparus.n.01,a genus of Paridae
+9377,irenidae.n.01,a family of birds of the suborder Oscines
+9394,iridoprocne.n.01,a genus of Hirundinidae
+9398,delichon.n.01,a genus of Hirundinidae
+9402,riparia.n.01,a genus of Hirundinidae
+9406,progne.n.01,a genus of Hirundinidae
+9483,bombycillidae.n.01,a family of birds of the suborder Oscines
+9559,falco.n.01,a genus of Falconidae
+9575,polyborus.n.01,a genus of Falconidae
+9587,harpia.n.01,a genus of Accipitridae
+9591,aquila.n.03,a genus of Accipitridae
+9598,haliaeetus.n.01,a genus of Accipitridae
+9617,gyps.n.01,a genus of Accipitridae
+9624,neophron.n.01,a genus of Accipitridae
+9628,aegypius.n.01,a genus of Accipitridae
+9669,athene.n.02,a genus of Strigidae
+9673,bubo.n.02,a genus of Strigidae
+9686,otus.n.01,a genus of Strigidae
+9706,sceloglaux.n.01,a genus of Strigidae
+9836,amphiumidae.n.01,congo snakes
+9838,genus_amphiuma.n.01,congo snakes
+10064,chelydridae.n.01,snapping turtles
+10068,chelydra.n.01,snapping turtles
+10221,uta.n.01,a reptile genus of Iguanidae
+10225,urosaurus.n.01,a reptile genus of Iguanidae
+10234,basiliscus.n.01,a reptile genus of Iguanidae
+10309,anguidae.n.01,alligator lizards
+10313,gerrhonotus.n.01,alligator lizards
+10335,lanthanotus.n.01,one species
+10381,saurosuchus.n.01,early archosaurian carnivore
+10383,proterochampsa.n.01,early archosaurian carnivore
+10575,genus_herrerasaurus.n.01,primitive theropod found in Argentina; early Triassic
+10579,genus_eoraptor.n.01,primitive theropod found in Argentina; early Triassic
+10603,maniraptor.n.01,advanced carnivorous theropod
+10605,oviraptorid.n.01,advanced carnivorous theropod
+10607,genus_velociraptor.n.01,advanced carnivorous theropod
+10615,genus_deinonychus.n.01,advanced bipedal carnivorous dinosaur
+10619,genus_utahraptor.n.01,advanced bipedal carnivorous dinosaur
+10800,sonora.n.01,ground snakes
+10804,potamophis.n.01,ground snakes
+10806,haldea.n.01,ground snakes
+10821,storeria.n.01,a genus of Colubridae
+10847,typhlopidae.n.01,blind snakes
+10849,leptotyphlopidae.n.01,blind snakes
+10857,drymarchon.n.01,a genus of Colubridae
+10867,charina.n.01,boas of western North America
+10871,lichanura.n.01,boas of western North America
+10899,micrurus.n.01,coral snakes
+10903,micruroides.n.01,coral snakes
+10920,denisonia.n.01,copperheads
+10996,agkistrodon.n.01,copperheads
+11152,ixodes_dentatus.n.01,usually does not bite humans; transmits Lyme disease spirochete to cottontail rabbits and wood rats
+11154,ixodes_spinipalpis.n.01,usually does not bite humans; transmits Lyme disease spirochete to cottontail rabbits and wood rats
+11167,acaridae.n.01,mites
+11171,trombidiidae.n.01,mites
+11175,trombiculidae.n.01,mites
+11525,stictopelia.n.01,a genus of Columbidae
+11539,ectopistes.n.01,a genus of Columbidae
+11569,amazona.n.01,a genus of Psittacidae
+11577,nestor.n.02,a genus of Psittacidae
+11581,kakatoe.n.01,a genus of Psittacidae
+11587,nymphicus.n.01,a genus of Psittacidae
+11591,agapornis.n.01,a genus of Psittacidae
+11600,glossopsitta.n.01,a genus of Loriinae
+11604,trichoglossus.n.01,a genus of Loriinae
+11609,conuropsis.n.01,a genus of Psittacidae
+11613,melopsittacus.n.01,a genus of Psittacidae
+11617,psittacula.n.01,a genus of Psittacidae
+11633,coccyzus.n.01,a genus of Cuculidae
+11645,centropus.n.01,a genus of Cuculidae
+11717,momotidae.n.01,a family of birds of the order Coraciiformes
+11723,todidae.n.01,a family of birds of the order Coraciiformes
+11741,chateura.n.01,a genus of Apodidae
+11745,collocalia.n.01,a genus of Apodidae
+11761,chalcostigma.n.01,thornbills
+11763,ramphomicron.n.01,thornbills
+11784,chordeiles.n.01,a genus of Caprimulgidae
+11788,phalaenoptilus.n.01,a genus of Caprimulgidae
+11816,picoides.n.01,a genus of Picidae
+11819,colaptes.n.01,a genus of Picidae
+11826,campephilus.n.01,a genus of Picidae
+11830,melanerpes.n.01,a genus of Picidae
+11834,sphyrapicus.n.01,a genus of Picidae
+11844,picumnus.n.01,a genus of Picidae
+11956,cairina.n.01,a genus of Anatidae
+12018,genus_coscoroba.n.01,a genus of Anatidae
+12028,cygnus.n.02,a genus of Anatidae
+12177,trichosurus.n.01,a genus of Phalangeridae
+12181,petaurus.n.01,a genus of Phalangeridae
+12185,acrobates.n.01,a genus of Phalangeridae
+12265,uropsilus.n.01,shrew moles
+12271,neurotrichus.n.01,shrew moles
+12275,soricidae.n.01,shrews
+12284,blarina.n.01,shrews
+12571,pleurobrachiidae.n.01,sea gooseberries
+12573,pleurobrachia.n.01,sea gooseberries
+12630,fasciolidae.n.01,a family of Trematoda
+12632,fasciola.n.01,a genus of Fasciolidae
+12636,fasciolopsis.n.01,a genus of Fasciolidae
+12640,schistosomatidae.n.01,a family of Trematoda
+12646,cestoda.n.01,tapeworms
+12652,genus_echinococcus.n.01,tapeworms
+12674,aphasmidia.n.01,one of two subgroups of Nematoda used in some classification systems
+12676,phasmidia.n.01,one of two subgroups of Nematoda used in some classification systems
+12690,oxyuridae.n.01,pinworms
+12692,enterobius.n.01,pinworms
+12697,cephalobidae.n.01,a family of Nematoda
+12703,tylenchidae.n.01,a family of Nematoda
+12861,patellidae.n.01,marine limpets
+12867,fissurellidae.n.01,marine limpets
+12962,solenidae.n.01,razor clams
+12964,ensis.n.01,razor clams
+12996,pteriidae.n.01,pearl oysters
+12998,pinctada.n.01,pearl oysters
+13422,peripatidae.n.01,a family of Onychophora
+13430,peripatopsidae.n.01,a family of Onychophora
+13479,threskiornithidae.n.01,ibises
+13483,genus_ibis.n.01,ibises
+13551,botaurus.n.01,bitterns
+13553,american_bittern.n.01,a kind of bittern
+13555,european_bittern.n.01,a kind of bittern
+13557,ixobrychus.n.01,bitterns
+13706,aphriza.n.01,a genus of Scolopacidae
+13710,actitis.n.01,a genus of Scolopacidae
+13716,erolia.n.01,a genus of Scolopacidae
+13722,tringa.n.01,a genus of Scolopacidae
+13730,greater_yellowlegs.n.01,a variety of yellowlegs
+13731,lesser_yellowlegs.n.01,a variety of yellowlegs
+13732,calidris.n.01,a genus of Scolopacidae
+13740,crocethia.n.01,a genus of Scolopacidae
+13744,bartramia.n.01,a genus of Scolopacidae
+13826,haematopodidae.n.01,oystercatchers
+13828,haematopus.n.01,oystercatchers
+13840,lobipes.n.01,a genus of Phalaropidae
+13844,steganopus.n.01,a genus of Phalaropidae
+13856,cursorius.n.01,coursers
+13860,pluvianus.n.01,coursers
+13889,pagophila.n.01,a genus of Laridae
+13893,rissa.n.01,a genus of Laridae
+13955,fratercula.n.01,puffins
+13961,lunda.n.01,puffins
+14120,cetacea.n.01,an order of Eutheria
+14269,arctocephalus.n.01,fur seals
+14274,callorhinus.n.01,fur seals
+14284,zalophus.n.01,sea lions
+14290,eumetopias.n.01,sea lions
+14329,tubulidentata.n.01,an order of Eutheria
+14792,pteropus.n.01,a genus of Megachiroptera
+14796,pteropus_capestratus.n.01,a variety of fruit bat
+14797,pteropus_hypomelanus.n.01,a variety of fruit bat
+14802,cynopterus.n.01,a genus of Megachiroptera
+14852,vespertilio.n.01,a genus of Vespertilionidae
+14856,lasiurus.n.01,a genus of Vespertilionidae
+14867,eptesicus.n.01,a genus of Vespertilionidae
+14872,antrozous.n.01,a genus of Vespertilionidae
+14882,western_pipistrel.n.01,of western North America
+14884,euderma.n.01,a genus of Vespertilionidae
+14888,plecotus.n.01,a genus of Vespertilionidae
+15037,adalia.n.02,genus of ladybugs
+15045,hippodamia.n.01,genus of ladybugs
+15127,melolonthidae.n.01,considered a separate family in some classification systems
+15130,melolontha.n.01,a genus of Melolonthidae
+15134,macrodactylus.n.01,a genus of Melolonthidae
+15138,cetoniidae.n.01,considered a separate family in some classification systems
+15220,acanthoscelides.n.01,a genus of Bruchidae
+15224,sitophylus.n.01,a genus of Bruchidae
+15279,tunga.n.01,a genus of Siphonaptera
+15283,echidnophaga.n.01,a genus of Siphonaptera
+15394,philophylla.n.01,leaf miners
+15453,mycetophilidae.n.01,fungus gnats
+15465,sciaridae.n.01,fungus gnats
+15872,belostomatidae.n.01,water bugs
+15884,corixidae.n.01,water bugs
+15928,dialeurodes.n.01,a genus of Aleyrodidae
+15932,trialeurodes.n.01,a genus of Aleyrodidae
+15944,coccoidea.n.01,scale insects and mealybugs
+15946,coccid_insect.n.01,scale insects and mealybugs
+15987,aphidoidea.n.01,plant lice
+16012,adelgidae.n.01,plant lice
+16018,balsam_woolly_aphid.n.01,a variety of adelgid
+16020,spruce_gall_aphid.n.01,a variety of adelgid
+16024,pine_leaf_aphid.n.01,a variety of adelgid
+16027,phylloxeridae.n.01,plant lice
+16056,philaenus.n.01,a genus of Cercopidae
+16060,aphrophora.n.01,a genus of Cercopidae
+16094,liposcelis.n.01,a genus of Psocidae
+16098,trogium.n.01,a genus of Psocidae
+16102,ephemeroptera.n.01,mayflies
+16107,ephemeridae.n.01,mayflies
+16207,thysanoptera.n.01,thrips
+16211,thripidae.n.01,thrips
+16275,spyeria.n.01,fritillaries
+16279,argynnis.n.01,fritillaries
+16372,paleacrita.n.01,geometrid moths
+16376,alsophila.n.01,geometrid moths
+16393,galleria.n.01,a genus of Pyralidae
+16409,cadra.n.01,a genus of Pyralidae
+16436,gracilariidae.n.01,leaf miners
+16482,pseudaletia.n.01,moths whose larvae are armyworms
+16488,spodoptera.n.01,moths whose larvae are armyworms
+16604,fall_webworm.n.01,a variety of webworm
+16610,garden_webworm.n.01,a variety of webworm
+16688,euryalida.n.01,basket stars
+16692,euryale.n.02,basket stars
+16698,gorgonocephalus.n.01,basket stars
+16713,crinoidea.n.01,sea lilies
+16717,ptilocrinus.n.01,sea lilies
+16842,conilurus.n.01,jerboa rats
+16846,notomys.n.01,jerboa rats
+16920,water_vole.n.02,of western North America
+16928,clethrionomys.n.01,a genus of Cricetidae
+16951,meriones.n.01,a genus of Cricetidae
+16967,myopus.n.01,a genus of Cricetidae
+16987,atherurus.n.01,a genus of Hystricidae
+16991,trichys.n.01,a genus of Hystricidae
+17007,perognathus.n.01,pocket mice
+17015,liomys.n.01,pocket mice
+17129,glaucomys.n.01,New World flying squirrels
+17131,american_flying_squirrel.n.01,New World flying squirrels
+17219,spalacidae.n.01,mole rats
+17227,bathyergus.n.01,mole rats
+17289,genus_mesohippus.n.01,a genus of Equidae
+17293,genus_protohippus.n.01,a genus of Equidae
+17944,ictonyx.n.01,a genus of Mustelidae
+17971,conepatus.n.01,a genus of Mustelidae
+17975,spilogale.n.01,a genus of Mustelidae
+17994,melogale.n.01,a genus of Mustelidae
+17998,arctonyx.n.01,a genus of Mustelidae
+18002,gulo.n.01,a genus of Mustelidae
+18007,genus_grison.n.01,a genus of Mustelidae
+18022,charronia.n.01,a genus of Mustelidae
+18026,eira.n.01,a genus of Mustelidae
+18054,tolypeutes.n.01,a genus of Dasypodidae
+18062,euphractus.n.01,a genus of Dasypodidae
+18073,burmeisteria.n.01,a genus of Dasypodidae
+18298,ouranopithecus.n.01,a genus of Hominidae
+18300,lufengpithecus.n.01,a genus of Hominidae
+18328,western_lowland_gorilla.n.01,a kind of gorilla
+18330,eastern_lowland_gorilla.n.01,a kind of gorilla
+18379,papio.n.01,baboons
+18382,mandrillus.n.01,baboons
+18509,nycticebus.n.01,a genus of Lorisidae
+18513,perodicticus.n.01,a genus of Lorisidae
+18515,potto.n.02,a kind of lemur
+18517,arctocebus.n.01,a genus of Lorisidae
+18519,angwantibo.n.01,a kind of lemur
+18545,tarsius_syrichta.n.01,a variety of tarsier
+18546,tarsius_glis.n.01,a variety of tarsier
+18571,loxodonta.n.01,a genus of Elephantidae
+18581,archidiskidon.n.01,a genus of Elephantidae
+18766,merluccius.n.01,hakes
+18770,urophycis.n.01,hakes
+18797,muraenidae.n.01,marine eels
+18801,congridae.n.01,marine eels
+18854,sardina.n.01,pilchards
+18858,sardinops.n.01,pilchards
+18987,australian_arowana.n.01,a species of large fish found in Australian rivers
+18989,australian_bonytongue.n.01,a species of large fish found in Australian rivers
+18999,trachipteridae.n.01,ribbonfishes
+19007,regalecidae.n.01,ribbonfishes
+19191,synagrops.n.01,a genus of Serranidae
+19201,roccus.n.01,a genus of Serranidae
+19222,paranthias.n.01,a genus of Serranidae
+19300,crevalle_jack.n.01,fish of western Atlantic and Gulf of Mexico
+19301,yellow_jack.n.03,fish of western Atlantic and Gulf of Mexico
+19303,elagatis.n.01,a genus of Carangidae
+19310,alectis.n.01,a genus of Carangidae
+19314,selene.n.02,a genus of Carangidae
+19318,seriola.n.01,a genus of Carangidae
+19327,trachinotus.n.01,a genus of Carangidae
+19333,naucrates.n.01,a genus of Carangidae
+19401,lutjanidae.n.01,snappers
+19415,ocyurus.n.01,snappers
+19435,anisotremus.n.01,a genus of Haemulidae
+19440,orthopristis.n.01,a genus of Haemulidae
+19451,pagrus.n.01,a genus of Sparidae
+19459,archosargus.n.01,a genus of Sparidae
+19465,lagodon.n.01,a genus of Sparidae
+19469,calamus.n.04,a genus of Sparidae
+19488,equetus.n.01,drumfish
+19494,bairdiella.n.01,drumfish
+19498,sciaenops.n.01,a genus of Sciaenidae
+19509,micropogonias.n.01,croakers
+19513,umbrina.n.01,croakers
+19529,genyonemus.n.01,a genus of Sciaenidae
+19533,seriphus.n.01,a genus of Sciaenidae
+19626,amphiprion.n.01,damsel fishes
+19632,abudefduf.n.01,damsel fishes
+19639,achoerodus.n.01,a genus of Labridae
+19643,lachnolaimus.n.01,a genus of Labridae
+19646,halicoeres.n.01,a genus of Labridae
+19652,thalassoma.n.01,a genus of Labridae
+19666,tautogolabrus.n.01,a genus of Labridae
+19730,lumpenus.n.01,a genus of Stichaeidae
+19736,cryptacanthodes.n.01,a genus of Stichaeidae
+19754,gymnelis.n.01,a genus of Zoarcidae
+19758,macrozoarces.n.01,a genus of Zoarcidae
+19920,poronotus.n.01,a genus of Stromateidae
+19924,genus_palometa.n.01,a genus of Stromateidae
+19928,paprilus.n.01,a genus of Stromateidae
+19932,psenes.n.01,a genus of Stromateidae
+19936,ariomma.n.01,a genus of Stromateidae
+19940,tetragonurus.n.01,a genus of Stromateidae
+19944,hyperoglyphe.n.01,a genus of Stromateidae
+20201,platichthys.n.01,a genus of Pleuronectidae
+20209,pseudopleuronectes.n.01,a genus of Pleuronectidae
+20212,microstomus.n.01,a genus of Pleuronectidae
+20216,hippoglossoides.n.01,a genus of Pleuronectidae
+20228,paralichthys.n.01,a genus of Bothidae
+20234,etropus.n.01,a genus of Bothidae
+20238,citharichthys.n.01,a genus of Bothidae
+20245,scophthalmus.n.01,a genus of Bothidae
+20250,psetta.n.01,a genus of Bothidae
+20269,parophrys.n.01,a genus of Soleidae
+20273,psettichthys.n.01,a genus of Soleidae
+20277,trinectes.n.01,a genus of Soleidae
+20342,acetanilide.n.01,a white crystalline compound used as an analgesic and also as an antipyretic
+20346,acetophenetidin.n.01,a white crystalline compound used as an analgesic and also as an antipyretic
+20358,acrylic.n.04,a synthetic fabric
+20496,alkylating_agent.n.01,an antineoplastic drug used to treat some forms of cancer
+20603,annulet.n.03,a small ring
+21410,benjamin_franklin_bridge.n.01,a suspension bridge across the Delaware River
+22254,cambridge_university.n.01,a university in England
+23864,delaware_memorial_bridge.n.01,a suspension bridge across the Delaware River
+23971,dideoxycytosine.n.01,an antiviral drug used to combat HIV infection
+23972,dideoxyinosine.n.01,an antiviral drug used to combat HIV infection
+27086,knit.n.02,a basic knitting stitch
+27455,lion-jaw_forceps.n.01,a type of forceps
+27528,loestrin.n.01,trade name for an oral contraceptive containing estradiol and norethindrone
+27560,lo/ovral.n.01,trade name for an oral contraceptive containing estradiol and norgestrel
+28113,modicon.n.01,trade name for an oral contraceptive containing estradiol and norethindrone
+28219,mouse-tooth_forceps.n.01,a type of forceps
+28472,norlestrin.n.01,trade name for an oral contraceptive containing estradiol and norethindrone
+28522,nylon.n.02,a synthetic fabric
+28733,ovocon.n.01,trade name for an oral contraceptive containing estradiol and norethindrone
+28735,ovral.n.01,trade name for an oral contraceptive containing estradiol and norgestrel
+28746,oxford_university.n.01,a university in England
+29091,periwinkle_plant_derivative.n.01,an antineoplastic drug used to treat some forms of cancer
+29821,pump-type_pliers.n.01,a type of pliers
+29841,purl.n.02,a basic knitting stitch
+30272,rib_joint_pliers.n.01,a type of pliers
+30311,ringlet.n.03,a small ring
+31044,shell_stitch.n.01,a crochet stitch
+31258,single_crochet.n.01,a crochet stitch
+31409,slit.n.01,a long narrow opening
+32572,telephone_line.n.02,a telephone connection
+33607,walt_whitman_bridge.n.01,a suspension bridge across the Delaware River
+34449,unpleasingness.n.01,the quality of being unpleasant
+34642,characteristic.n.02,a distinguishing quality
+34882,nastiness.n.03,the quality of being unpleasant
+34999,inaccuracy.n.01,the quality of being inaccurate and having errors
+35000,inexactness.n.01,the quality of being inaccurate and having errors
+35012,distinction.n.03,a distinguishing quality
+35820,claret.n.01,a dark purplish-red color
+35826,fuschia.n.01,a dark purplish-red color
+36614,delicacy.n.04,smallness of stature
+36616,puniness.n.02,smallness of stature
+36617,dwarfishness.n.01,smallness of stature
+36623,increase.n.04,the amount by which something increases
+36926,magnitude.n.03,relative importance
+36930,prominence.n.02,relative importance
+36997,freedom_of_religion.n.01,a civil right guaranteed by the First Amendment to the US Constitution
+36998,freedom_of_speech.n.01,a civil right guaranteed by the First Amendment to the US Constitution
+37006,right_to_speedy_and_public_trial_by_jury.n.01,a civil right guaranteed by the 6th amendment to the US Constitution
+37007,right_to_an_attorney.n.01,a civil right guaranteed by the 6th amendment to the US Constitution
+39368,male_internal_reproductive_organ.n.01,the reproductive organs of a man
+39456,male_reproductive_gland.n.01,the reproductive organs of a man
+41386,charm.n.04,(physics) one of the six flavors of quark
+41387,strangeness.n.02,(physics) one of the six flavors of quark
+43361,call.n.01,a telephone connection
+44391,prayer_of_azariah_and_song_of_the_three_children.n.01,an Apocryphal book consisting of text added to the Book of Daniel
+44392,susanna.n.01,an Apocryphal book consisting of text added to the Book of Daniel
+44393,bel_and_the_dragon.n.01,an Apocryphal book consisting of text added to the Book of Daniel
+44404,i_maccabees.n.01,an Apocryphal book describing the life of Judas Maccabaeus
+44405,ii_maccabees.n.01,an Apocryphal book describing the life of Judas Maccabaeus
+45357,good_morning.n.01,a conventional expression of greeting or farewell
+45359,good_afternoon.n.01,a conventional expression of greeting or farewell
+45526,dictate.n.01,an authoritative rule
+45527,regulation.n.01,an authoritative rule
+45666,consent.n.01,permission to do something
+45669,leave.n.02,permission to do something
+45734,master_of_arts_in_library_science.n.01,a master's degree in library science
+45741,master_of_library_science.n.01,a master's degree in library science
+45761,doctor_of_theology.n.01,a doctor's degree in theology
+45762,doctor_of_sacred_theology.n.01,a doctor's degree in theology
+46436,dagger.n.02,a character used in printing to indicate a cross reference or footnote
+46437,double_dagger.n.01,a character used in printing to indicate a cross reference or footnote
+46888,blaia_zimondal.n.01,an artificial language
+46895,latinesce.n.01,an artificial language based on Latin
+46898,lingualumina.n.01,an artificial language
+46899,lingvo_kosmopolita.n.01,an artificial language
+46900,monario.n.01,an artificial language
+46902,novial.n.01,an artificial language
+46903,nov-latin.n.01,an artificial language based on Latin
+46904,occidental.n.02,an artificial language
+46905,optez.n.01,an artificial language
+46908,romanal.n.01,an artificial language
+46909,solresol.n.01,an artificial language
+47059,chiricahua_apache.n.01,an Apache language
+47060,san_carlos_apache.n.01,an Apache language
+47071,kulanapan.n.01,a group of languages of the Hokan family
+47073,quoratean.n.01,a group of languages of the Hokan family
+47155,lisu.n.01,a Loloish language
+47156,hani.n.01,a Loloish language
+47157,lahu.n.01,a Loloish language
+47158,lolo.n.01,a Loloish language
+47171,white_tai.n.01,a branch of the Tai languages
+47172,red_tai.n.01,a branch of the Tai languages
+47173,tai_dam.n.01,a branch of the Tai languages
+47174,tai_nuea.n.01,a branch of the Tai languages
+47175,tai_long.n.01,a branch of the Tai languages
+47176,tai_lue.n.01,a branch of the Tai languages
+47177,tai_yuan.n.01,a branch of the Tai languages
+47178,khuen.n.01,a branch of the Tai languages
+47180,khamti.n.01,a branch of the Tai languages
+47181,southern_tai.n.01,a branch of the Tai languages
+47182,tay.n.01,a branch of the Tai languages
+47183,nung.n.01,a branch of the Tai languages
+47184,tho.n.01,a branch of the Tai languages
+47185,thai.n.02,a branch of the Tai languages
+47186,bouyei.n.01,a branch of the Tai languages
+47187,zhuang.n.01,a branch of the Tai languages
+47188,yay.n.01,a branch of the Tai languages
+47189,saek.n.01,a branch of the Tai languages
+47216,dyirbal.n.01,a language of Australian aborigines
+47217,walbiri.n.01,a language of Australian aborigines
+47220,tsouic.n.01,a Formosan language
+47221,paiwanic.n.01,a Formosan language
+47265,west_midland.n.01,a dialect of Middle English
+47267,kentish.n.02,a dialect of Middle English
+47268,southwestern.n.01,a dialect of Middle English
+47272,anglian.n.01,one of the major dialects of Old English
+47273,kentish.n.01,one of the major dialects of Old English
+47347,umbrian.n.01,an extinct Italic language of ancient southern Italy
+47348,oscan.n.02,an extinct Italic language of ancient southern Italy
+47388,turfan.n.01,a dialect of Tocharian
+47389,kuchean.n.01,a dialect of Tocharian
+47417,avestan.n.01,an ancient Iranian language
+47418,gathic.n.01,an ancient Iranian language
+47431,lycian.n.01,an Anatolian language
+47432,luwian.n.01,an Anatolian language
+47433,lydian.n.01,an Anatolian language
+47434,palaic.n.01,an Anatolian language
+47467,pengo.n.02,a Dravidian language spoken in south central India
+47468,manda.n.01,a Dravidian language spoken in south central India
+47473,naiki.n.01,a Dravidian language spoken in south central India
+47474,parji.n.01,a Dravidian language spoken in south central India
+47475,ollari.n.01,a Dravidian language spoken in south central India
+47482,bole.n.03,a Chadic language spoken in northern Nigeria and closely related to Hausa
+47483,angas.n.01,a Chadic language spoken in northern Nigeria and closely related to Hausa
+47484,ron.n.01,a Chadic language spoken in northern Nigeria
+47485,bade.n.01,a Chadic language spoken in northern Nigeria
+47486,warji.n.01,a Chadic language spoken in northern Nigeria
+47487,zaar.n.01,a Chadic language spoken in northern Nigeria
+47490,bura.n.01,a Chadic language spoken south of Lake Chad
+47491,higi.n.01,a Chadic language spoken south of Lake Chad
+47493,matakam.n.01,a Chadic language spoken south of Lake Chad
+47494,sukur.n.01,a Chadic language spoken south of Lake Chad
+47495,daba.n.01,a Chadic language spoken south of Lake Chad
+47496,bata.n.01,a Chadic language spoken south of Lake Chad
+47497,kotoko.n.01,a Chadic language spoken south of Lake Chad
+47498,musgu.n.01,a Chadic language spoken south of Lake Chad
+47499,gidar.n.01,a Chadic language spoken south of Lake Chad
+47501,somrai.n.01,a Chadic language spoken in Chad
+47502,nancere.n.01,a Chadic language spoken in Chad
+47503,kera.n.01,a Chadic language spoken in Chad
+47505,mokulu.n.01,a Chadic language spoken in Chad
+47506,sokoro.n.01,a Chadic language spoken in Chad
+47550,kinyarwanda.n.01,a Bantu language
+47551,kiswahili.n.01,a Bantu language
+47555,luyia.n.01,a Bantu language
+47556,mashi.n.01,a Bantu language
+47560,swazi.n.02,a Bantu language closely related to Zulu
+47561,xhosa.n.03,a Bantu language closely related to Zulu
+47585,dinka.n.01,a Nilotic language
+47586,luo.n.01,a Nilotic language
+47587,masai.n.01,a Nilotic language
+48724,yes.n.01,an affirmative
+48725,yea.n.01,an affirmative
+48732,no.n.01,a negative
+48733,nay.n.01,a negative
+49613,descent.n.01,a movement downward
+49648,augmentation.n.01,the amount by which something increases
+49652,fall.n.07,a movement downward
+50511,fury.n.01,a feeling of intense anger
+50513,infuriation.n.01,a feeling of intense anger
+52228,lane's_prince_albert.n.01,apple used primarily in cooking
+52229,newtown_wonder.n.01,apple used primarily in cooking
+52920,barley.n.01,a grain of barley
+53306,semi-skimmed_milk.n.01,milk from which some of the cream has been removed
+53308,low-fat_milk.n.01,milk from which some of the cream has been removed
+54734,form_family.n.01,(biology) an artificial taxonomic category for organisms of which the true relationships are obscure
+54745,form_genus.n.01,(biology) an artificial taxonomic category for organisms of which the true relationships are obscure
+54978,augustinian_canons.n.01,an Augustinian monastic order
+54980,austin_friars.n.01,an Augustinian monastic order
+55328,regiment.n.01,army unit smaller than a division
+55329,brigade.n.01,army unit smaller than a division
+55417,hood.n.03,(slang) a neighborhood
+57651,'hood.n.01,(slang) a neighborhood
+57953,barbuda.n.01,an island in Antigua and Barbuda
+57954,redonda.n.01,an island in Antigua and Barbuda
+58116,coahuila.n.01,a state in northern Mexico; mostly high plateau
+58121,leon.n.03,a city in central Mexico
+58132,san_luis_potosi.n.01,a city in central Mexico
+58154,aruba.n.01,a popular island resort in the Netherlands Antilles
+58155,bonaire.n.01,a popular island resort in the Netherlands Antilles
+58156,curacao.n.01,a popular island resort in the Netherlands Antilles
+58336,viti_levu.n.01,a volcanic island in the Fijis
+58337,vanua_levu.n.01,a volcanic island in the Fijis
+58478,marche.n.01,a region in central Italy
+58494,tuscany.n.01,a region in central Italy
+58784,avon.n.03,a county in southwestern England
+58785,berkshire.n.01,a county in southern England
+58790,devon.n.01,a county in southwestern England
+58796,hertfordshire.n.01,a county in southern England
+58801,east_sussex.n.01,a county in southern England on the English Channel
+58803,west_sussex.n.01,a county in southern England on the English Channel
+58816,west_yorkshire.n.01,a metropolitan county in northern England
+58817,south_yorkshire.n.01,a metropolitan county in northern England
+58900,assam.n.01,state in northeastern India
+58902,manipur.n.01,state in northeastern India
+59115,basse-normandie.n.01,a division of Normandy
+59125,haute-normandie.n.01,a division of Normandy
+59327,faisalabad.n.01,city in northeast Pakistan
+59331,lahore.n.01,city in northeast Pakistan
+59396,nevis.n.01,one of the islands of Saint Christopher-Nevis
+59397,sombrero.n.01,one of the islands of Saint Christopher-Nevis
+59503,kazan.n.02,an industrial city in the European part of Russia
+59508,perm.n.01,a city in the European part of Russia
+59510,saratov.n.01,an industrial city in the European part of Russia
+59512,ufa.n.01,a city in the European part of Russia
+59515,chelyabinsk.n.01,a city in the Asian part of Russia
+59516,omsk.n.01,a city in the Asian part of Russia
+59528,estonia.n.01,a republic in northeastern Europe on the Baltic Sea
+59669,ariana.n.01,city in Tunisia
+59670,ehadhamen.n.01,city in Tunisia
+59826,delaware.n.04,a Mid-Atlantic state; one of the original 13 colonies
+59910,indiana.n.01,a state in midwestern United States
+59921,iowa.n.02,a state in midwestern United States
+59932,kansas.n.01,a state in midwestern United States
+59936,hays.n.03,a town in central Kansas
+59939,salina.n.01,a town in central Kansas
+59962,maine.n.01,a state in New England
+59970,maryland.n.01,a Mid-Atlantic state; one of the original 13 colonies
+59979,massachusetts.n.01,a state in New England; one of the original 13 colonies
+59987,concord.n.04,town in eastern Massachusetts near Boston where the first battle of the American Revolution was fought
+59989,lexington.n.01,town in eastern Massachusetts near Boston where the first battle of the American Revolution was fought
+60002,michigan.n.01,a midwestern state in north central United States in the Great Lakes region
+60046,cape_girardeau.n.01,a town in southeast Missouri
+60052,poplar_bluff.n.01,a town in southeast Missouri
+60075,new_hampshire.n.01,a state in New England; one of the original 13 colonies
+60089,new_brunswick.n.01,a university town in central New Jersey
+60091,princeton.n.01,a university town in central New Jersey
+60110,new_york.n.02,a Mid-Atlantic state; one of the original 13 colonies
+60118,bronx.n.01,a borough of New York City
+60119,brooklyn.n.01,a borough of New York City
+60137,queens.n.01,a borough of New York City
+60138,staten_island.n.01,a borough of New York City
+60152,syracuse.n.01,a city in central New York
+60153,utica.n.01,a city in central New York
+60174,greensboro.n.01,a city of north central North Carolina
+60177,winston-salem.n.01,a city of north central North Carolina
+60182,ohio.n.01,a midwestern state in north central United States in the Great Lakes region
+60201,oregon.n.01,a state in northwestern United States on the Pacific
+60208,pennsylvania.n.01,a Mid-Atlantic state; one of the original 13 colonies
+60240,tennessee.n.01,a state in east central United States
+60268,garland.n.02,a city in northeastern Texas (suburb of Dallas)
+60277,plano.n.01,a city in northeastern Texas (suburb of Dallas)
+60290,vermont.n.01,a state in New England
+60316,washington.n.02,a state in northwestern United States on the Pacific
+60327,west_virginia.n.01,a state in east central United States
+60476,nyamuragira.n.01,an active volcano in eastern Congo
+60477,nyiragongo.n.01,an active volcano in eastern Congo
+60782,cachi.n.01,"a mountain in the Andes in Argentina (22,047 feet high)"
+60794,canandaigua_lake.n.01,a glacial lake in central New York; one of the Finger Lakes
+60945,crack.n.01,a long narrow opening
+61042,el_libertador.n.02,"a mountain in the Andes in Argentina (22,047 feet high)"
+61361,keuka_lake.n.01,a glacial lake in central New York; one of the Finger Lakes
+61448,limpopo.n.01,an African river; flows into the Indian Ocean
+61496,madeira.n.01,a Brazilian river; tributary of the Amazon River
+61706,oder.n.01,a European river; flows into the Baltic Sea
+61852,purus.n.01,a Brazilian river; tributary of the Amazon River
+62283,vistula.n.01,a European river; flows into the Baltic Sea
+62355,zambezi.n.01,an African river; flows into the Indian Ocean
+62399,aglaia.n.01,(Greek mythology) one of the three Graces
+62400,euphrosyne.n.01,(Greek mythology) one of the three Graces
+62401,thalia.n.02,(Greek mythology) one of the three Graces
+62407,stheno.n.01,(Greek mythology) one of the three Gorgons
+62408,euryale.n.01,(Greek mythology) one of the three Gorgons
+62438,alecto.n.01,one of the three Furies
+62439,megaera.n.01,one of the three Furies
+62440,tisiphone.n.01,one of the three Furies
+62470,tien-pao.n.01,a member of the Taoist Trinity
+62471,ling-pao.n.01,a member of the Taoist Trinity
+62507,bogey.n.01,an evil spirit
+62509,cacodemon.n.01,an evil spirit
+62799,brule.n.01,a member of a group of Siouan people who constituted a division of the Teton Sioux
+62845,kalapooia.n.01,a member of the North American Indian people of Oregon
+62855,kusan.n.01,a member of the North American Indian people of Oregon
+62864,miniconju.n.01,a member of a group of Siouan people who constituted a division of the Teton Sioux
+62915,sihasapa.n.01,a member of a group of Siouan people who constituted a division of the Teton Sioux
+62936,yahi.n.01,a member of an extinct North American Indian people who lived in northern California
+62937,yana.n.01,a member of an extinct North American Indian people who lived in northern California
+63164,cambodian.n.01,a native or inhabitant of Cambodia
+63330,achaean.n.01,a member of one of four linguistic divisions of the prehistoric Greeks
+63331,aeolian.n.01,a member of one of four linguistic divisions of the prehistoric Greeks
+63332,dorian.n.01,a member of one of four linguistic divisions of the prehistoric Greeks
+63333,ionian.n.01,a member of one of four linguistic divisions of the prehistoric Greeks
+63580,sinhalese.n.01,a native or inhabitant of Sri Lanka
+63601,khmer.n.02,a native or inhabitant of Cambodia
+63759,sri_lankan.n.01,a native or inhabitant of Sri Lanka
+64014,ancestress.n.01,a woman ancestor
+64026,animal_fancier.n.01,a person who breeds animals
+64210,back_judge.n.01,a football official
+64532,breeder.n.01,a person who breeds animals
+64627,caitiff.n.01,a cowardly and despicable person
+64650,canary.n.02,a female singer
+65237,cur.n.02,a cowardly and despicable person
+65863,field_judge.n.01,a football official
+65972,foremother.n.01,a woman ancestor
+66302,guard.n.02,the person who plays that position on a football team
+66842,kiddy.n.01,a young child
+66850,king_of_england.n.01,the sovereign ruler of England
+67087,logician.n.01,a person skilled at symbolic logic
+68521,queen_of_england.n.01,the sovereign ruler of England
+68998,selectman.n.01,an elected member of a board of officials who run New England towns
+69000,selectwoman.n.01,an elected member of a board of officials who run New England towns
+69134,side_judge.n.01,a football official
+69156,singer.n.01,a person who sings
+69304,songster.n.02,a person who sings
+69312,soprano.n.01,a female singer
+69679,symbolic_logician.n.01,a person skilled at symbolic logic
+69697,tackle.n.01,the person who plays that position on a football team
+69865,toddler.n.01,a young child
+70461,balthazar.n.01,(New Testament) one of the three sages from the east who came bearing gifts for the infant Jesus
+70464,caspar.n.01,(New Testament) one of the three sages from the east who came bearing gifts for the infant Jesus
+70674,elastance.n.01,the reciprocal of capacitance
+71292,anthocerotaceae.n.01,hornworts
+71294,anthoceros.n.01,hornworts
+71670,hemlock.n.04,an evergreen tree
+71951,sundacarpus.n.01,one species
+71985,pseudotaxus.n.01,one species
+72558,western_pasqueflower.n.01,of western North America
+73160,genus_drypis.n.01,one species
+73354,cycloloma.n.01,a caryophyllaceous genus of the family Chenopodiaceae
+73358,genus_halogeton.n.01,a caryophyllaceous genus of the family Chenopodiaceae
+73615,rhoeadales.n.01,an order of dicotyledonous plants
+73656,alyssum.n.02,a genus of the family Cruciferae
+73773,cochlearia.n.01,a genus of the family Cruciferae
+73860,nasturtium.n.02,aquatic herbs
+74098,plantain-leaved_pussytoes.n.01,a variety of pussytoes
+74099,field_pussytoes.n.01,a variety of pussytoes
+74100,solitary_pussytoes.n.01,a variety of pussytoes
+74126,argyranthemum.n.01,comprises plants often included in the genus Chrysanthemum
+74203,annual_salt-marsh_aster.n.01,a variety of aster
+74204,aromatic_aster.n.01,a variety of aster
+74205,arrow_leaved_aster.n.01,a variety of aster
+74206,azure_aster.n.01,a variety of aster
+74207,bog_aster.n.01,a variety of aster
+74208,crooked-stemmed_aster.n.01,a variety of aster
+74209,eastern_silvery_aster.n.01,a variety of aster
+74210,flat-topped_white_aster.n.01,a variety of aster
+74211,late_purple_aster.n.01,a variety of aster
+74212,panicled_aster.n.01,a variety of aster
+74213,perennial_salt_marsh_aster.n.01,a variety of aster
+74214,purple-stemmed_aster.n.01,a variety of aster
+74215,rough-leaved_aster.n.01,a variety of aster
+74216,rush_aster.n.01,a variety of aster
+74217,schreiber's_aster.n.01,a variety of aster
+74218,small_white_aster.n.01,a variety of aster
+74219,smooth_aster.n.01,a variety of aster
+74220,southern_aster.n.01,a variety of aster
+74221,starved_aster.n.01,a variety of aster
+74222,tradescant's_aster.n.01,a variety of aster
+74223,wavy-leaved_aster.n.01,a variety of aster
+74224,western_silvery_aster.n.01,a variety of aster
+74225,willow_aster.n.01,a variety of aster
+74257,slender_knapweed.n.01,a variety of knapweed
+74258,jersey_knapweed.n.01,a variety of knapweed
+74269,buphthalmum.n.01,oxeye
+74355,grass-leaved_golden_aster.n.01,a variety of golden aster
+74356,sickleweed_golden_aster.n.01,a variety of golden aster
+74433,dendranthema.n.01,comprises plants often included in the genus Chrysanthemum
+74599,genus_heliopsis.n.01,oxeye
+74681,leucanthemum.n.01,comprises plants often included in the genus Chrysanthemum
+74930,boott's_goldenrod.n.01,a variety of goldenrod
+74931,elliott's_goldenrod.n.01,a variety of goldenrod
+74932,ohio_goldenrod.n.01,a variety of goldenrod
+74933,rough-stemmed_goldenrod.n.01,a variety of goldenrod
+74934,showy_goldenrod.n.01,a variety of goldenrod
+74935,tall_goldenrod.n.01,a variety of goldenrod
+74936,zigzag_goldenrod.n.01,a variety of goldenrod
+75124,aplectrum.n.01,a monocotyledonous genus of the family Orchidaceae
+75251,eburophyton.n.01,a monocotyledonous genus of the family Orchidaceae
+75275,glossodia.n.01,small genus of Australian orchids
+75314,hexalectris.n.01,a monocotyledonous genus of the family Orchidaceae
+75356,miltonia.n.01,genus of tropical American orchids
+75402,plectorrhiza.n.01,small genus of Australian orchids
+75442,genus_sobralia.n.01,genus of tropical American orchids
+75488,dioscoreaceae.n.01,yams
+75490,dioscorea.n.01,yams
+75544,hottonia.n.01,aquatic herbs
+75725,smooth_crabgrass.n.01,a weed
+75783,barleycorn.n.01,a grain of barley
+76638,calluna.n.01,one species
+77754,genus_canella.n.01,one species
+77824,genus_idesia.n.01,one species
+78108,belamcanda.n.01,a monocotyledonous genus of the family Iridaceae
+78112,genus_crocus.n.01,a monocotyledonous genus of the family Iridaceae
+78125,ixia.n.01,a monocotyledonous genus of the family Iridaceae
+78301,asphodelaceae.n.01,one of many subfamilies into which some classification systems subdivide the Liliaceae
+78442,ornithogalum.n.01,sometimes placed in family Hyacinthaceae
+78449,muscari.n.01,sometimes placed in family Hyacinthaceae
+78489,ruscaceae.n.01,one of many subfamilies into which some classification systems subdivide the Liliaceae but not widely accepted
+78491,tecophilaeacea.n.01,one of many subfamilies into which some classification systems subdivide the Liliaceae but not widely accepted
+78497,xanthorrhoeaceae.n.01,one of many subfamilies into which some classification systems subdivide the Liliaceae but not widely accepted
+78529,smilacaceae.n.01,one of many subfamilies into which some classification systems subdivide the Liliaceae but not widely accepted
+78541,convallariaceae.n.01,one of many subfamilies into which some classification systems subdivide the Liliaceae but not widely accepted
+78572,uvulariaceae.n.01,one of many subfamilies into which some classification systems subdivide the Liliaceae
+79735,common_arrowhead.n.01,a weed
+79736,ribbon-leaved_water_plantain.n.01,a variety of water plantain
+79737,narrow-leaved_water_plantain.n.01,a variety of water plantain
+79744,genus_hydrilla.n.01,one species
+80061,northern_dewberry.n.01,of eastern North America
+80063,swamp_dewberry.n.01,of eastern North America
+80377,protium_heptaphyllum.n.01,tropical American tree
+80379,protium_guianense.n.01,tropical American tree
+80526,tangerine.n.01,a variety of mandarin orange
+80528,satsuma.n.01,a variety of mandarin orange
+80773,nuytsia.n.01,one species
+80788,sapindales.n.01,an order of dicotyledonous plants
+80929,american_holly.n.01,an evergreen tree
+80931,low_gallberry_holly.n.01,an evergreen shrub
+80932,tall_gallberry_holly.n.01,an evergreen shrub
+80933,yaupon_holly.n.01,an evergreen shrub
+80934,deciduous_holly.n.01,a holly tree
+80935,juneberry_holly.n.01,a holly shrub
+80936,largeleaf_holly.n.01,a holly tree
+80937,geogia_holly.n.01,a holly shrub
+80938,common_winterberry_holly.n.01,a holly shrub
+80939,smooth_winterberry_holly.n.01,a holly shrub
+81077,gutta-percha_tree.n.02,one of several East Indian trees yielding gutta-percha
+81081,gutta-percha_tree.n.01,one of several East Indian trees yielding gutta-percha
+81116,sarracenia.n.01,pitcher plants
+81137,nepenthes.n.01,pitcher plants
+81155,drosophyllum.n.01,one species
+81278,darmera.n.01,one species
+81353,winter_currant.n.01,a flowering shrub
+81672,hairy_wood_mint.n.01,a variety of wood mint
+81674,downy_wood_mint.n.01,a variety of wood mint
+82277,lantana.n.01,a flowering shrub
+82660,marsileaceae.n.01,clover ferns
+82662,marsilea.n.01,clover ferns
+82677,salviniaceae.n.01,water ferns
+82748,orange_mushroom_pimple.n.01,a variety of mushroom pimple
+82749,green_mushroom_pimple.n.01,a variety of mushroom pimple
+82762,helotiaceae.n.01,a fungus family of order Helotiales
+82766,sclerotiniaceae.n.01,a fungus family of order Helotiales
+82925,geglossaceae.n.01,a type of ascomycetous fungus
+82926,sarcosomataceae.n.01,a type of ascomycetous fungus
+82927,black_felt_cup.n.01,a common name for a variety of Sarcosomataceae
+82928,rufous_rubber_cup.n.01,a common name for a variety of Sarcosomataceae
+82929,charred_pancake_cup.n.01,a common name for a variety of Sarcosomataceae
+82930,devil's_cigar.n.01,a common name for a variety of Sarcosomataceae
+82931,devil's_urn.n.01,a common name for a variety of Sarcosomataceae
+82932,winter_urn.n.01,a common name for a variety of Sarcosomataceae
+82971,roccellaceae.n.01,a fungus family of division Lichenes
+82977,pertusariaceae.n.01,a fungus family of division Lichenes
+82995,cladoniaceae.n.01,a family of lichens
+83001,parmeliaceae.n.01,a family of lichens
+83077,white_slime_mushroom.n.01,a type of slime mushroom
+83078,fischer's_slime_mushroom.n.01,a type of slime mushroom
+83153,entolomataceae.n.01,a family of fungi belonging to the order Agaricales
+83200,tricholomataceae.n.01,a family of fungi belonging to the order Agaricales
+83221,volvariaceae.n.01,a family of fungi belonging to the order Agaricales
+83227,pluteaceae.n.01,a family of fungi belonging to the order Agaricales
+83422,tulostomatales.n.01,an order of fungi belonging to the class Gasteromycetes
+83477,secotiales.n.01,an order of fungi belonging to the class Gasteromycetes
+83501,albatrellus.n.01,a genus of fungi belonging to the family Polyporaceae
+83507,neolentinus.n.01,a genus of fungi belonging to the family Polyporaceae
+83511,nigroporus.n.01,a genus of fungi belonging to the family Polyporaceae
+83515,oligoporus.n.01,a genus of fungi belonging to the family Polyporaceae
+83567,fuscoboletinus.n.01,a genus of fungi belonging to the family Boletaceae
+83573,leccinum.n.01,a genus of fungi belonging to the family Boletaceae
+83577,phylloporus.n.01,a genus of fungi belonging to the family Boletaceae
+83581,suillus.n.01,a genus of fungi belonging to the family Boletaceae
+83589,boletellus.n.01,a genus of fungi belonging to the family Boletaceae
+83692,hygrocybe.n.01,a genus of fungi belonging to the family Hygrophoraceae
+83696,hygrophorus.n.01,a genus of fungi belonging to the family Hygrophoraceae
+83718,hygrotrama.n.01,a genus of fungi belonging to the family Hygrophoraceae
+83722,neohygrophorus.n.01,a genus of fungi belonging to the family Hygrophoraceae
+83727,cortinariaceae.n.01,a family of fungi belonging to the order Agaricales
+84083,rhamnales.n.01,an order of dicotyledonous plants
+84325,ceratopteris.n.01,water ferns
+84402,asplenium.n.01,in some classification systems placed in family Polypodiaceae
+84429,schaffneria.n.01,one species
+84455,virginia_chain_fern.n.01,North American fern
+84463,davalliaceae.n.01,one of a number of families into which Polypodiaceae has been subdivided in some classification systems
+84477,dennstaedtiaceae.n.01,one of a number of families into which Polypodiaceae has been subdivided in some classification systems
+84503,genus_thyrsopteris.n.01,one species
+84573,western_holly_fern.n.01,North American fern
+84607,oleandraceae.n.01,one of a number of families into which Polypodiaceae has been subdivided in some classification systems
+84623,acrostichum.n.01,in some classification systems placed in family Polypodiaceae
+84775,shining_clubmoss.n.01,a variety of club moss
+84776,alpine_clubmoss.n.01,a variety of club moss
+84779,running_pine.n.01,a variety of club moss
+84780,ground_cedar.n.01,a variety of club moss
+84781,ground_fir.n.01,a variety of club moss
+85831,dollar.n.03,a United States coin worth one dollar
+85832,susan_b_anthony_dollar.n.01,a United States coin worth one dollar
+86972,megaflop.n.01,(computer science) a unit for measuring the speed of a computer system
+86974,teraflop.n.01,(computer science) a unit for measuring the speed of a computer system
+87215,elastance_unit.n.01,the reciprocal of capacitance
+88106,hundredweight.n.01,a unit of weight equal to 100 kilograms
+88108,quintal.n.01,a unit of weight equal to 100 kilograms
+88284,trillion.n.02,the number that is represented as a one followed by 18 zeros
+88286,quadrillion.n.01,the number that is represented as a one followed by 24 zeros
+88287,quintillion.n.01,the number that is represented as a one followed by 18 zeros
+88289,septillion.n.01,the number that is represented as a one followed by 24 zeros
+88425,battalion.n.02,a large indefinite number
+88436,myriad.n.01,a large indefinite number
+88902,solid.n.03,a three-dimensional shape
+88919,solid_figure.n.01,a three-dimensional shape
+89132,spherule.n.01,a small sphere
+89142,pellet.n.01,a small sphere
+90107,gingivitis.n.01,inflammation of the gums
+90863,blister_blight.n.02,a disease of tea plants
+90883,rim_blight.n.01,a disease of tea plants
+91625,chorditis.n.01,inflammation of the spermatic cord
+91630,corditis.n.01,inflammation of the spermatic cord
+91750,ulitis.n.01,inflammation of the gums
+93306,bohrium.n.01,a transuranic element
+93355,darmstadtium.n.01,a radioactive transuranic element
+93356,dubnium.n.01,a transuranic element
+93391,hassium.n.01,a radioactive transuranic element
+93443,meitnerium.n.01,a radioactive transuranic element
+93503,roentgenium.n.01,a radioactive transuranic element
+93515,seaborgium.n.01,a transuranic element
+93574,ununbium.n.01,a radioactive transuranic element
+93575,ununhexium.n.01,a radioactive transuranic element
+93576,ununpentium.n.01,a radioactive transuranic element
+93577,ununquadium.n.01,a radioactive transuranic element
+93578,ununtrium.n.01,a radioactive transuranic element
+94399,brioschi.n.01,an antacid
+94400,bromo-seltzer.n.01,an antacid
+94402,maalox.n.01,an antacid
+94403,mylanta.n.01,an antacid
+94405,pepto-bismal.n.01,an antacid
+94406,rolaids.n.01,an antacid
+94407,tums.n.01,an antacid
+94674,clunch.n.01,hardened clay
+94770,deoxyadenosine_monophosphate.n.01,one of the four nucleotides used in building DNA; all four nucleotides have a common phosphate group and a sugar (ribose)
+94771,deoxycytidine_monophosphate.n.01,one of the four nucleotides used in building DNA; all four nucleotides have a common phosphate group and a sugar (ribose)
+94772,deoxyguanosine_monophosphate.n.01,one of the four nucleotides used in building DNA; all four nucleotides have a common phosphate group and a sugar (ribose)
+94773,deoxythymidine_monophosphate.n.01,one of the four nucleotides used in building DNA; all four nucleotides have a common phosphate group and a sugar (ribose)
+94848,air.n.06,once thought to be one of four elements composing the universe (Empedocles)
+94849,fire.n.05,once thought to be one of four elements composing the universe (Empedocles)
+94860,earth.n.05,once thought to be one of four elements composing the universe (Empedocles)
+94878,water.n.03,once thought to be one of four elements composing the universe (Empedocles)
+95370,indurated_clay.n.01,hardened clay
+95508,calcium_bicarbonate.n.01,a bicarbonate that is a major cause of hard water
+95569,magnesium_bicarbonate.n.01,a bicarbonate that is a major cause of hard water
+95867,bromophenol_blue.n.01,a dye used as an acid-base indicator
+95869,bromothymol_blue.n.01,a dye used as an acid-base indicator
+96594,vitamin_k1.n.01,a form of vitamin K
+96595,vitamin_k3.n.01,a form of vitamin K
+97156,robert_e_lee's_birthday.n.01,celebrated in southern United States
+97173,saint_agnes's_eve.n.01,a Christian holy day
+97215,jefferson_davis'_birthday.n.01,celebrated in southern United States
+97265,saint_joseph.n.01,a Christian holy day
+97342,lustrum.n.01,a period of five years
+97348,quinquennium.n.01,a period of five years
+97659,rainy_season.n.01,one of the two seasons in tropical climates
+97661,dry_season.n.01,one of the two seasons in tropical climates
+97705,eleventh_hour.n.01,the latest possible moment
+97711,high_time.n.01,the latest possible moment
+97717,cold_spell.n.01,a spell of cold weather
+97754,by-and-by.n.01,an indefinite time in the future
+97820,manana.n.01,an indefinite time in the future
+98030,snap.n.02,a spell of cold weather
+98062,sniff.v.02,inhale audibly through the nose
+98125,bring_to.v.01,return to consciousness
+98133,come_to.v.04,return to consciousness
+98301,fructify.v.03,bear fruit
+98315,whelp.v.01,birth
+98318,calve.v.02,birth
+98452,catch.v.19,contract
+98468,mutilate.v.03,destroy or injure severely
+98476,devolve.v.03,grow worse
+98553,make.v.48,behave in a certain way
+98563,snuff.v.02,inhale audibly through the nose
+98717,up.v.01,raise
+98739,bump_up.v.01,increase or raise
+98740,accumulate.v.02,collect or gather
+98810,deprive.v.03,take away
+98811,fail.v.11,get worse
+98836,take_off.v.02,take away or remove
+98886,insert.v.02,introduce
+98930,denude.v.01,lay bare
+98933,clear.v.05,remove
+98955,mitigate.v.02,make less severe or harsh
+98974,chasten.v.02,restrain
+98979,worsen.v.01,grow worse
+98981,slip.v.04,get worse
+98983,suffer.v.05,get worse
+99012,dehydrate.v.02,remove water from
+99021,salt.v.04,preserve with salt
+99077,weaken.v.02,become weaker
+99104,enhance.v.01,increase
+99133,hold_down.v.02,restrain
+99154,reduce.v.09,make smaller
+99213,derive.v.03,come from
+99352,bleach.v.01,remove color from
+99423,light.v.01,make lighter or brighter
+99427,mutilate.v.01,destroy or injure severely
+99438,season.v.02,make fit
+99463,fit.v.04,make fit
+99527,brighten.v.01,make lighter or brighter
+99533,obscure.v.03,make obscure or unclear
+99668,break.v.53,happen
+99674,operate.v.05,happen
+99727,close_out.v.03,terminate
+99738,lift.v.20,put an end to
+99739,ax.v.02,terminate
+99748,dissolve.v.03,come to an end
+99787,interrupt.v.04,terminate
+99798,condense.v.03,remove water from
+99892,christianize.v.02,convert to Christianity
+99895,evangelize.v.02,convert to Christianity
+99947,admix.v.01,mix or blend
+100062,absent.v.01,go away or leave
+100070,gleam.v.03,appear briefly
+100076,flash.v.02,appear briefly
+100080,resurface.v.03,appear again
+100084,reappear.v.01,appear again
+100118,drop.v.03,go down in value
+100160,decrease.v.02,make smaller
+100185,dissolve.v.01,become weaker
+100191,clean_out.v.01,empty completely
+100194,evacuate.v.02,empty completely
+100224,wash_down.v.02,flow freely
+100225,flush.v.02,flow freely
+100304,knock_out.v.01,eliminate
+100324,draw.v.31,contract
+100334,stub_out.v.01,extinguish by crushing
+100422,boost.v.04,increase or raise
+100548,de-ionate.v.01,remove ions from
+100569,achromatize.v.01,remove color from
+100592,corn.v.02,preserve with salt
+100610,salinate.v.01,add salt to
+100661,open.v.06,make available
+100693,make.v.47,develop into
+100730,uniformize.v.01,make uniform
+100827,wash_away.v.01,eliminate
+100829,pull.v.17,take away
+100884,visualize.v.04,make visible
+100933,sense.v.04,comprehend
+100939,touch.v.13,comprehend
+101073,make_out.v.03,comprehend
+101138,interpolate.v.01,estimate the value of
+101151,explore.v.03,examine minutely
+101217,rate.v.03,estimate the value of
+101261,misjudge.v.01,judge incorrectly
+101447,miscalculate.v.01,judge incorrectly
+101488,rake_up.v.01,bring to light
+101858,turn_a_blind_eye.v.01,refuse to acknowledge
+101877,demur.v.01,take exception to
+101956,reprehend.v.01,express strong disapproval of
+101957,deplore.v.01,express strong disapproval of
+101978,instruct.v.03,make aware of
+102083,praise.v.01,express approval of
+102099,applaud.v.02,express approval of
+102118,condemn.v.01,express strong disapproval of
+102142,challenge.v.01,take exception to
+102155,wake.v.04,make aware of
+102200,commend.v.01,express approval of
+102425,suggest.v.05,call to mind
+102466,obfuscate.v.01,make obscure or unclear
+102467,swallow.v.04,utter indistinctly
+102938,slur.v.03,utter indistinctly
+103016,mince.v.01,make less severe or harsh
+103023,ignore.v.01,refuse to acknowledge
+103540,avail.v.01,use to one's advantage
+103550,play.v.20,use to one's advantage
+103608,chomp.v.01,chew noisily
+103740,crunch.v.03,chew noisily
+103772,grass.v.04,cover with grass
+103778,stub.v.02,extinguish by crushing
+103865,poke_into.v.01,enter briefly
+103900,knead.v.01,make uniform
+104061,skin.v.04,strip the skin off
+104132,flay.v.01,strip the skin off
+104158,contract.v.06,make smaller
+104221,fasten.v.03,attach to
+104272,fall_off.v.01,come off
+104346,daub.v.02,apply to a surface
+104365,scour.v.01,examine minutely
+104421,annex.v.02,attach to
+104478,bare.v.01,lay bare
+104562,affix.v.01,attach to
+104601,repaint.v.02,paint again
+104604,put_on.v.07,apply to a surface
+104698,corral.v.03,collect or gather
+104789,sock.v.01,hit hard
+104812,smash.v.01,hit hard
+104867,manhandle.v.01,handle roughly
+104888,whack.v.01,hit hard
+104951,tread.v.06,mate with
+104952,serve.v.14,mate with
+104964,masturbate.v.01,stimulate sexually
+104978,fetch.v.03,take away or remove
+104988,propagate.v.03,transmit
+105083,hoist.v.03,raise
+105096,percolate.v.05,pass through
+105116,commingle.v.01,mix or blend
+105201,suspend.v.01,hang freely
+105237,empty.v.04,remove
+105341,throw.v.01,propel through the air
+105365,shed.v.01,get rid of
+105527,lay.v.04,lay eggs
+105528,blow.v.17,lay eggs
+105586,separate.v.12,come apart
+105621,subvert.v.04,destroy completely
+105623,devour.v.01,destroy completely
+105626,consume.v.04,destroy completely
+105728,storm.v.02,take by force
+105750,doff.v.01,remove
+105826,grass.v.02,cover with grass
+105836,loft.v.02,propel through the air
+105916,re-create.v.01,create anew
+105921,end.v.04,put an end to
+105953,generate.v.01,bring into existence
+106006,run.v.21,carry out
+106060,fruit.v.02,bear fruit
+106075,demolish.v.01,destroy completely
+106234,repaint.v.01,paint again
+106295,coin.v.01,make up
+106370,cut.v.23,perform or carry out
+106480,recreate.v.04,create anew
+106489,vamp.v.01,make up
+106573,make.v.16,perform or carry out
+106607,arouse.v.07,stimulate sexually
+106711,steam.v.04,get very angry
+106712,raise_the_roof.v.01,get very angry
+107011,halt.v.01,cause to stop
+107039,bob.v.01,move up and down repeatedly
+107081,push_up.v.01,push upward
+107083,boost_up.v.01,push upward
+107119,flap.v.02,move noisily
+107155,steal.v.02,move stealthily
+107174,bounce.v.03,move up and down repeatedly
+107216,jiggle.v.01,move to and fro
+107231,stumble.v.01,walk unsteadily
+107256,walk.v.02,accompany or escort
+107313,skulk.v.03,move stealthily
+107315,toddle.v.01,walk unsteadily
+107323,pop_in.v.01,enter briefly
+107345,parade.v.02,march in a procession
+107564,leapfrog.v.01,jump across
+107590,decline.v.06,go down in value
+107611,hike.v.01,increase
+107653,prick_up.v.01,raise
+107723,march.v.01,march in a procession
+107776,depart.v.04,go away or leave
+107805,depart.v.03,leave
+107807,roar_off.v.01,leave
+107826,catch.v.09,reach in time
+107840,make.v.37,reach in time
+107863,see.v.22,accompany or escort
+107882,break_up.v.03,come apart
+107917,flex.v.01,contract
+108085,effuse.v.01,pour out
+108088,decant.v.01,pour out
+108105,shake.v.07,get rid of
+108128,interpose.v.02,introduce
+108137,bring_in.v.05,transmit
+108215,hop.v.05,jump across
+108234,come_out.v.05,come off
+108247,bang.v.04,move noisily
+108285,undergo.v.01,pass through
+108432,uncover.v.01,make visible
+108577,clang.v.01,make a loud noise
+108621,honk.v.01,make a loud noise
+108683,salt.v.01,add salt to
+108730,clear.v.16,sell
+108797,waste.v.03,get rid of
+108862,dishonor.v.03,refuse to accept
+108898,deal.v.13,sell
+108907,de-access.v.01,dispose of by selling
+108936,clean_up.v.03,dispose of
+109032,hijack.v.02,seize control of
+109088,unearth.v.01,bring to light
+109442,move.v.12,dispose of by selling
+109493,deionize.v.01,remove ions from
+109666,clean_out.v.02,force out
+109670,squeeze_out.v.01,force out
+109805,direct.v.04,be in charge of
+109808,head.v.02,be in charge of
+109812,move_in_on.v.02,seize control of
+109892,house.v.02,provide housing for
+109992,distribute.v.03,make available
+110152,strong-arm.v.01,handle roughly
+110511,play.v.17,behave in a certain way
+110518,take.v.01,carry out
+110622,come.v.15,develop into
+110678,hover.v.02,move to and fro
+110728,lodge.v.04,provide housing for
+110731,keep.v.16,raise
+110829,echo.v.03,call to mind
+110927,characterize.v.02,be characteristic of
+111001,thrust.v.07,push upward
+111018,dangle.v.01,hang freely
+111040,present.v.05,introduce
+111047,exemplify.v.01,be characteristic of
+111152,break.v.23,come to an end
+58113,chihuahua.n.02,a state in northern Mexico; mostly high plateau
+59539,lithuania.n.01,a republic in northeastern Europe on the Baltic Sea
+60716,great_bear.n.01,a constellation outside the zodiac that rotates around the North Star
+61455,little_bear.n.01,a constellation outside the zodiac that rotates around the North Star
+99741,stop.v.05,cause to stop
+106482,create.v.02,bring into existence
+108724,take.v.21,take by force
+108792,get_rid_of.v.01,dispose of
+108862,refuse.v.02,refuse to accept
+109755,abolish.v.01,do away with
+110624,originate_in.v.01,come from
+110629,obviate.v.01,do away with

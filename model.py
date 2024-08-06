@@ -12,7 +12,7 @@ import numpy as np
 import os.path
 
 class NodeEmbedder(Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, encoder=None) -> None:
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, num_heads, encoder=None) -> None:
         super().__init__()
 
         if encoder is None:
@@ -23,12 +23,20 @@ class NodeEmbedder(Module):
 
         self.num_layers = num_layers
         self.conv_layers = ModuleList()
-        self.conv_layers.append(GATConv(input_dim, int(hidden_dim/2), heads=2))
+        self.conv_layers.append(GATConv(input_dim, 
+                                        hidden_dim, 
+                                        heads=num_heads,
+                                        edge_dim=3,
+                                        add_self_loops=False))
         for _ in range(num_layers-1):
-            self.conv_layers.append(GATConv(hidden_dim, int(hidden_dim/2), heads=2))
+            self.conv_layers.append(GATConv(hidden_dim*num_heads,
+                                            hidden_dim,
+                                            heads=num_heads,
+                                            edge_dim=3,
+                                            add_self_loops=False))
 
         self.out = Sequential(
-            nn.Linear(hidden_dim, hidden_dim),
+            nn.Linear(hidden_dim*num_heads, hidden_dim),
             nn.Linear(hidden_dim, output_dim))
 
     def encode_inputs(self, tokens:torch.Tensor, batch_size=1024, encoding_dim=768, verbose=False):
@@ -60,16 +68,22 @@ class NodeEmbedder(Module):
         encodings = torch.load(path)
         return encodings
 
-    def forward(self, x:torch.Tensor, edge_index:torch.Tensor, encode_tokens=False) -> torch.Tensor:
+    def forward(self, 
+                x:torch.Tensor, 
+                edge_index:torch.Tensor, 
+                edge_attr:torch.Tensor,
+                encode_tokens=False
+    ) -> torch.Tensor:
         if encode_tokens:
             assert x.dim() == 3
             assert x.shape[1] == 3
 
             x = self.encode_inputs(x)
             self.save_input_encodings(x)
-
         for conv in self.conv_layers:
-            x = conv(x, edge_index)
+            print('in: ',x.shape, edge_index.shape, edge_attr.shape)
+            x = conv(x, edge_index, edge_attr)
+            print('out: ',x.shape, edge_index.shape, edge_attr.shape)
             x = F.relu(x)
         
         return self.out(x)
@@ -98,8 +112,8 @@ class Model(Module):
         super().__init__()
         self.node_embedder = node_embedder
         self.link_predictor = link_predictor
-    def forward(self, x, edge_index, pos_target_links, neg_target_links):
-        emb = self.node_embedder(x, edge_index)
+    def forward(self, x, edge_index, edge_attr, pos_target_links, neg_target_links):
+        emb = self.node_embedder(x, edge_index, edge_attr)
         pos_pred = self.link_predictor(emb[pos_target_links[0]],
                                        emb[pos_target_links[1]])
         neg_pred = self.link_predictor(emb[neg_target_links[0]],
