@@ -16,12 +16,16 @@ def train(model, optimizer, data, batch_size=None, scheduler=None):
     model.train()
     optimizer.zero_grad()
     if batch_size is None:
-        pred, labels = model(data.x, 
-                             data.edge_index, 
-                             data.edge_attr,
-                             data.pos_samples[data.train_mask], 
-                             data.neg_samples[data.train_mask]) 
-        loss = F.binary_cross_entropy_with_logits(pred, labels)
+        target_links = torch.cat([data.pos_samples[:,data.train_mask],
+                                  data.neg_samples[:,data.train_mask]])
+        labels = torch.cat([data.y[data.train_mask], 
+                            torch.zeros_like(data.y[data.train_mask])])
+        labels = F.one_hot(labels).float()
+        preds = model(data.x, 
+                      data.edge_index, 
+                      data.edge_attr,
+                      target_links) 
+        loss = F.cross_entropy(preds, labels)
         loss.backward()    
         optimizer.step()
         return loss.item()
@@ -31,12 +35,16 @@ def train(model, optimizer, data, batch_size=None, scheduler=None):
                                  batch_size=batch_size,
                                  shuffle=True)
         for link_idxs in link_loader:
-            pred, labels = model(data.x, 
-                                 data.edge_index,
-                                 data.edge_attr,
-                                 data.pos_samples[:,link_idxs], 
-                                 data.neg_samples[:,link_idxs])
-            loss = F.binary_cross_entropy_with_logits(pred, labels)
+            target_links = torch.cat([data.pos_samples[:,link_idxs],
+                                      data.neg_samples[:,link_idxs]])
+            labels = torch.cat([data.y[data.link_idxs], 
+                                torch.zeros_like(data.y[link_idxs])])
+            labels = F.one_hot(labels).float()
+            preds = model(data.x, 
+                          data.edge_index, 
+                          data.edge_attr,
+                          target_links) 
+            loss = F.cross_entropy(preds, labels)
             loss.backward()
             optimizer.step()
             if losses is None:
@@ -51,13 +59,17 @@ def val(model, data, batch_size=None):
     model.eval()
     with torch.no_grad():
         if batch_size is None:
-            pred, labels = model(data.x, 
-                                data.edge_index,
-                                data.edge_attr, 
-                                data.pos_samples[data.val_mask], 
-                                data.neg_samples[data.val_mask])
-            all_preds, all_labels = pred.to('cpu'), labels.to('cpu')
-            mean_loss = F.binary_cross_entropy_with_logits(pred, labels).item()
+            target_links = torch.cat([data.pos_samples[:,data.val_mask],
+                                    data.neg_samples[:,data.val_mask]])
+            labels = torch.cat([data.y[data.val_mask], 
+                                torch.zeros_like(data.y[data.val_mask])])
+            labels = F.one_hot(labels).float()
+            preds = model(data.x, 
+                          data.edge_index, 
+                          data.edge_attr,
+                          target_links) 
+            all_preds, all_labels = preds.to('cpu'), labels.to('cpu')
+            mean_loss = F.cross_entropy(preds, labels).item()
         else:
             losses = None
             all_preds, all_labels = None, None
@@ -65,57 +77,69 @@ def val(model, data, batch_size=None):
                                      batch_size=batch_size,
                                      shuffle=False)
             for link_idxs in link_loader:
-                pred, labels = model(data.x, 
-                                     data.edge_index,
-                                     data.edge_attr,
-                                     data.pos_samples[:,link_idxs], 
-                                     data.neg_samples[:,link_idxs])
-                loss = F.binary_cross_entropy_with_logits(pred, labels)
+                target_links = torch.cat([data.pos_samples[:,link_idxs],
+                                        data.neg_samples[:,link_idxs]])
+                labels = torch.cat([data.y[data.link_idxs], 
+                                    torch.zeros_like(data.y[link_idxs])])
+                labels = F.one_hot(labels).float()
+                preds = model(data.x, 
+                              data.edge_index, 
+                              data.edge_attr,
+                              target_links) 
+                loss = F.cross_entropy(preds, labels)
                 if losses is None:
                     losses = torch.tensor([loss.item()])
-                    all_preds = pred.to('cpu')
+                    all_preds = preds.to('cpu')
                     all_labels = labels.to('cpu')
                 else:
                     losses = torch.concat([losses, torch.tensor([loss.item()])])
-                    all_preds = torch.concat([all_preds, pred.to('cpu')])
+                    all_preds = torch.concat([all_preds, preds.to('cpu')])
                     all_labels = torch.concat([all_labels, labels.to('cpu')])
             mean_loss = losses.mean().item()
 
         all_preds = binarize(all_preds, threshold=LABEL_TRESHOLD)
         return (mean_loss, 
-                precision_score(all_labels, all_preds, zero_division=0.0), 
-                recall_score(all_labels, all_preds, zero_division=0.0),
-                f1_score(all_labels, all_preds, zero_division=0.0))
+                precision_score(all_labels, all_preds, average='macro', zero_division=0.0), 
+                recall_score(all_labels, all_preds, average='macro', zero_division=0.0),
+                f1_score(all_labels, all_preds, average='macro', zero_division=0.0))
 
 def test(model, data, batch_size=None):
     model.eval()
     with torch.no_grad():
         if batch_size is None:
-            pred, labels = model(data.x, 
-                                data.edge_index,
-                                data.edge_attr, 
-                                data.pos_samples[data.test_mask], 
-                                data.neg_samples[data.test_mask])
-            all_preds, all_labels = pred.to('cpu'), labels.to('cpu')
+            target_links = torch.cat([data.pos_samples[:,data.test_mask],
+                                    data.neg_samples[:,data.test_mask]])
+            labels = torch.cat([data.y[data.test_mask], 
+                                torch.zeros_like(data.y[data.test_mask])])
+            labels = F.one_hot(labels).float()
+            preds = model(data.x, 
+                          data.edge_index, 
+                          data.edge_attr,
+                          target_links) 
+            all_preds, all_labels = preds.to('cpu'), labels.to('cpu')
         else:
             all_preds, all_labels = None, None
             link_loader = DataLoader(data.test_mask,
                                     batch_size=batch_size,
                                     shuffle=False)
             for link_idxs in link_loader:
-                pred, labels = model(data.x, 
-                                     data.edge_index,
-                                     data.edge_attr,
-                                     data.pos_samples[:,link_idxs], 
-                                     data.neg_samples[:,link_idxs])
+                target_links = torch.cat([data.pos_samples[:,link_idxs],
+                                        data.neg_samples[:,link_idxs]])
+                labels = torch.cat([data.y[data.link_idxs], 
+                                    torch.zeros_like(data.y[link_idxs])])
+                labels = F.one_hot(labels).float()
+                preds = model(data.x, 
+                              data.edge_index, 
+                              data.edge_attr,
+                              target_links) 
                 if all_preds is None:
-                    all_preds = pred.to('cpu')
+                    all_preds = preds.to('cpu')
                     all_labels = labels.to('cpu')
                 else:
-                    all_preds = torch.concat([all_preds, pred.to('cpu')])
+                    all_preds = torch.concat([all_preds, preds.to('cpu')])
                     all_labels = torch.concat([all_labels, labels.to('cpu')])
         
-        return all_labels.numpy().flatten(), all_preds.numpy().flatten()
+        return all_labels.numpy(), all_preds.numpy()
 
 if __name__ == '__main__':
     import pandas as pd

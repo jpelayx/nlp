@@ -24,16 +24,16 @@ class NodeEmbedder(Module):
         self.num_layers = num_layers
         self.conv_layers = ModuleList()
         self.conv_layers.append(GATv2Conv(input_dim, 
-                                        hidden_dim, 
-                                        num_heads,
-                                        edge_dim=3,
-                                        add_self_loops=False))
+                                          hidden_dim, 
+                                          num_heads,
+                                          edge_dim=3,
+                                          add_self_loops=False))
         for _ in range(num_layers-1):
             self.conv_layers.append(GATv2Conv(hidden_dim*num_heads,
-                                            hidden_dim,
-                                            num_heads,
-                                            edge_dim=3,
-                                            add_self_loops=False))
+                                              hidden_dim,
+                                              num_heads,
+                                              edge_dim=3,
+                                              add_self_loops=False))
 
         self.out = Sequential(
             nn.Linear(hidden_dim*num_heads, hidden_dim),
@@ -103,19 +103,16 @@ class LinkPredictor(Module):
             x = linear(x)
             x = F.relu(x)
         x = self.linear_layers[-1](x)
-        return torch.sigmoid(x)
+        # return torch.sigmoid(x)
+        return x
 
 class Model(Module):
     def __init__(self, node_embedder, link_predictor) -> None:
         super().__init__()
         self.node_embedder = node_embedder
         self.link_predictor = link_predictor
-    def forward(self, x, edge_index, edge_attr, pos_target_links, neg_target_links):
+    def forward(self, x, edge_index, edge_attr, target_links):
         emb = self.node_embedder(x, edge_index, edge_attr)
-        pos_pred = self.link_predictor(emb[pos_target_links[0]],
-                                       emb[pos_target_links[1]])
-        neg_pred = self.link_predictor(emb[neg_target_links[0]],
-                                       emb[neg_target_links[1]])
-        pred = torch.concat([pos_pred, neg_pred])
-        labels = torch.concat([torch.ones_like(pos_pred), torch.zeros_like(neg_pred)])
-        return pred, labels
+        preds = self.link_predictor(emb[target_links[0]],
+                                    emb[target_links[1]])
+        return preds

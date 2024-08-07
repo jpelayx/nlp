@@ -144,6 +144,7 @@ def split_data_stratified(g, num_nodes, add_self_loops=True):
     g.train_mask = train_mask.to(device)
     g.val_mask = val_mask.to(device)
     g.test_mask = test_mask.to(device)
+    g.y = labels.to(device)
 
     if add_self_loops:    
         edge_index_i, edge_index_j = src[train_mask], tar[train_mask]
