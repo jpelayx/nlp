@@ -66,6 +66,7 @@ def val(model, data, batch_size=None):
                           data.edge_index, 
                           data.edge_attr,
                           target_links) 
+            preds = torch.argmax(preds, dim=1)
             all_preds, all_labels = preds.to('cpu'), labels.to('cpu')
             mean_loss = F.cross_entropy(preds, labels).item()
         else:
@@ -83,6 +84,7 @@ def val(model, data, batch_size=None):
                               data.edge_index, 
                               data.edge_attr,
                               target_links) 
+                preds = torch.argmax(preds, dim=1)
                 loss = F.cross_entropy(preds, labels)
                 if losses is None:
                     losses = torch.tensor([loss.item()])
@@ -94,7 +96,6 @@ def val(model, data, batch_size=None):
                     all_labels = torch.concat([all_labels, labels.to('cpu')])
             mean_loss = losses.mean().item()
 
-        all_preds = binarize(all_preds, threshold=LABEL_TRESHOLD)
         return (mean_loss, 
                 precision_score(all_labels, all_preds, average='macro', zero_division=0.0), 
                 recall_score(all_labels, all_preds, average='macro', zero_division=0.0),
