@@ -84,8 +84,8 @@ def val(model, data, batch_size=None):
                               data.edge_index, 
                               data.edge_attr,
                               target_links) 
-                preds = torch.argmax(preds, dim=1)
                 loss = F.cross_entropy(preds, labels)
+                preds = torch.argmax(preds, dim=1)
                 if losses is None:
                     losses = torch.tensor([loss.item()])
                     all_preds = preds.to('cpu')
