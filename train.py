@@ -17,10 +17,9 @@ def train(model, optimizer, data, batch_size=None, scheduler=None):
     optimizer.zero_grad()
     if batch_size is None:
         target_links = torch.cat([data.pos_samples[:,data.train_mask],
-                                  data.neg_samples[:,data.train_mask]])
+                                  data.neg_samples[:,data.train_mask]], dim=1)
         labels = torch.cat([data.y[data.train_mask], 
                             torch.zeros_like(data.y[data.train_mask])])
-        labels = F.one_hot(labels).float()
         preds = model(data.x, 
                       data.edge_index, 
                       data.edge_attr,
@@ -36,14 +35,14 @@ def train(model, optimizer, data, batch_size=None, scheduler=None):
                                  shuffle=True)
         for link_idxs in link_loader:
             target_links = torch.cat([data.pos_samples[:,link_idxs],
-                                      data.neg_samples[:,link_idxs]])
-            labels = torch.cat([data.y[data.link_idxs], 
+                                      data.neg_samples[:,link_idxs]], dim=1)
+            labels = torch.cat([data.y[link_idxs], 
                                 torch.zeros_like(data.y[link_idxs])])
-            labels = F.one_hot(labels).float()
             preds = model(data.x, 
                           data.edge_index, 
                           data.edge_attr,
                           target_links) 
+            print(target_links.shape, labels.shape, preds.shape)
             loss = F.cross_entropy(preds, labels)
             loss.backward()
             optimizer.step()
@@ -60,10 +59,9 @@ def val(model, data, batch_size=None):
     with torch.no_grad():
         if batch_size is None:
             target_links = torch.cat([data.pos_samples[:,data.val_mask],
-                                    data.neg_samples[:,data.val_mask]])
+                                      data.neg_samples[:,data.val_mask]], dim=1)
             labels = torch.cat([data.y[data.val_mask], 
                                 torch.zeros_like(data.y[data.val_mask])])
-            labels = F.one_hot(labels).float()
             preds = model(data.x, 
                           data.edge_index, 
                           data.edge_attr,
@@ -78,10 +76,9 @@ def val(model, data, batch_size=None):
                                      shuffle=False)
             for link_idxs in link_loader:
                 target_links = torch.cat([data.pos_samples[:,link_idxs],
-                                        data.neg_samples[:,link_idxs]])
-                labels = torch.cat([data.y[data.link_idxs], 
+                                          data.neg_samples[:,link_idxs]], dim=1)
+                labels = torch.cat([data.y[link_idxs], 
                                     torch.zeros_like(data.y[link_idxs])])
-                labels = F.one_hot(labels).float()
                 preds = model(data.x, 
                               data.edge_index, 
                               data.edge_attr,
@@ -108,10 +105,9 @@ def test(model, data, batch_size=None):
     with torch.no_grad():
         if batch_size is None:
             target_links = torch.cat([data.pos_samples[:,data.test_mask],
-                                    data.neg_samples[:,data.test_mask]])
+                                      data.neg_samples[:,data.test_mask]], dim=1)
             labels = torch.cat([data.y[data.test_mask], 
                                 torch.zeros_like(data.y[data.test_mask])])
-            labels = F.one_hot(labels).float()
             preds = model(data.x, 
                           data.edge_index, 
                           data.edge_attr,
@@ -124,10 +120,9 @@ def test(model, data, batch_size=None):
                                     shuffle=False)
             for link_idxs in link_loader:
                 target_links = torch.cat([data.pos_samples[:,link_idxs],
-                                        data.neg_samples[:,link_idxs]])
-                labels = torch.cat([data.y[data.link_idxs], 
+                                          data.neg_samples[:,link_idxs]], dim=1)
+                labels = torch.cat([data.y[link_idxs], 
                                     torch.zeros_like(data.y[link_idxs])])
-                labels = F.one_hot(labels).float()
                 preds = model(data.x, 
                               data.edge_index, 
                               data.edge_attr,
@@ -162,7 +157,7 @@ if __name__ == '__main__':
                                  num_layers=2).to(device)
     link_pred = LinkPredictor(input_dim=256, 
                               hidden_dim=128,
-                              output_dim=1,
+                              output_dim=3,
                               num_layers=3).to(device)
     model = Model(node_embedder, link_pred)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  
