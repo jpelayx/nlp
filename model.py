@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from torch.nn import Module, ModuleList, Sequential
 from torch.utils.data import DataLoader
-from torch_geometric.nn import GCNConv, GATConv
+from torch_geometric.nn import GCNConv, GATv2Conv
 from transformers import BertModel
 
 import numpy as np
@@ -23,15 +23,15 @@ class NodeEmbedder(Module):
 
         self.num_layers = num_layers
         self.conv_layers = ModuleList()
-        self.conv_layers.append(GATConv(input_dim, 
+        self.conv_layers.append(GATv2Conv(input_dim, 
                                         hidden_dim, 
-                                        heads=num_heads,
+                                        num_heads,
                                         edge_dim=3,
                                         add_self_loops=False))
         for _ in range(num_layers-1):
-            self.conv_layers.append(GATConv(hidden_dim*num_heads,
+            self.conv_layers.append(GATv2Conv(hidden_dim*num_heads,
                                             hidden_dim,
-                                            heads=num_heads,
+                                            num_heads,
                                             edge_dim=3,
                                             add_self_loops=False))
 
@@ -81,9 +81,7 @@ class NodeEmbedder(Module):
             x = self.encode_inputs(x)
             self.save_input_encodings(x)
         for conv in self.conv_layers:
-            print('in: ',x.shape, edge_index.shape, edge_attr.shape)
             x = conv(x, edge_index, edge_attr)
-            print('out: ',x.shape, edge_index.shape, edge_attr.shape)
             x = F.relu(x)
         
         return self.out(x)

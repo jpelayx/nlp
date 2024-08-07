@@ -34,9 +34,8 @@ def train(model, optimizer, data, batch_size=None, scheduler=None):
             pred, labels = model(data.x, 
                                  data.edge_index,
                                  data.edge_attr,
-                                 data.pos_samples[link_idxs], 
-                                 data.neg_samples[link_idxs])
-            print('.')
+                                 data.pos_samples[:,link_idxs], 
+                                 data.neg_samples[:,link_idxs])
             loss = F.binary_cross_entropy_with_logits(pred, labels)
             loss.backward()
             optimizer.step()
@@ -48,40 +47,75 @@ def train(model, optimizer, data, batch_size=None, scheduler=None):
             scheduler.step()
         return losses.mean().item()
 
-def val(model, data):
+def val(model, data, batch_size=None):
     model.eval()
-    link_pred.eval()
     with torch.no_grad():
-        pred, labels = model(data.x, 
-                             data.edge_index,
-                             data.edge_attr, 
-                             data.pos_samples[data.val_mask], 
-                             data.neg_samples[data.val_mask])
-        loss = F.binary_cross_entropy_with_logits(pred, labels)
+        if batch_size is None:
+            pred, labels = model(data.x, 
+                                data.edge_index,
+                                data.edge_attr, 
+                                data.pos_samples[data.val_mask], 
+                                data.neg_samples[data.val_mask])
+            all_preds, all_labels = pred.to('cpu'), labels.to('cpu')
+            mean_loss = F.binary_cross_entropy_with_logits(pred, labels).item()
+        else:
+            losses = None
+            all_preds, all_labels = None, None
+            link_loader = DataLoader(data.val_mask,
+                                     batch_size=batch_size,
+                                     shuffle=False)
+            for link_idxs in link_loader:
+                pred, labels = model(data.x, 
+                                     data.edge_index,
+                                     data.edge_attr,
+                                     data.pos_samples[:,link_idxs], 
+                                     data.neg_samples[:,link_idxs])
+                loss = F.binary_cross_entropy_with_logits(pred, labels)
+                if losses is None:
+                    losses = torch.tensor([loss.item()])
+                    all_preds = pred.to('cpu')
+                    all_labels = labels.to('cpu')
+                else:
+                    losses = torch.concat([losses, torch.tensor([loss.item()])])
+                    all_preds = torch.concat([all_preds, pred.to('cpu')])
+                    all_labels = torch.concat([all_labels, labels.to('cpu')])
+            mean_loss = losses.mean().item()
 
-        labels = labels.to('cpu')
-        pred = binarize(pred.to('cpu'), threshold=LABEL_TRESHOLD)
-        return (loss.item(), 
-                precision_score(labels, pred, zero_division=0.0), 
-                recall_score(labels, pred, zero_division=0.0),
-                f1_score(labels, pred, zero_division=0.0))
+        all_preds = binarize(all_preds, threshold=LABEL_TRESHOLD)
+        return (mean_loss, 
+                precision_score(all_labels, all_preds, zero_division=0.0), 
+                recall_score(all_labels, all_preds, zero_division=0.0),
+                f1_score(all_labels, all_preds, zero_division=0.0))
 
-def test(model, data):
+def test(model, data, batch_size=None):
     model.eval()
-    link_pred.eval()
     with torch.no_grad():
-        pred, labels = model(data.x, 
-                             data.edge_index,
-                             data.edge_attr, 
-                             data.pos_samples[data.test_mask], 
-                             data.neg_samples[data.test_mask])
-        # loss = F.binary_cross_entropy_with_logits(pred, labels)
-
-        labels = labels.to('cpu').numpy()
-        pred = pred.to('cpu').numpy()
-        print(labels.shape, pred.shape)	
-        # pred = binarize(pred, threshold=LABEL_TRESHOLD)
-        return labels.flatten(), pred.flatten()
+        if batch_size is None:
+            pred, labels = model(data.x, 
+                                data.edge_index,
+                                data.edge_attr, 
+                                data.pos_samples[data.test_mask], 
+                                data.neg_samples[data.test_mask])
+            all_preds, all_labels = pred.to('cpu'), labels.to('cpu')
+        else:
+            all_preds, all_labels = None, None
+            link_loader = DataLoader(data.test_mask,
+                                    batch_size=batch_size,
+                                    shuffle=False)
+            for link_idxs in link_loader:
+                pred, labels = model(data.x, 
+                                     data.edge_index,
+                                     data.edge_attr,
+                                     data.pos_samples[:,link_idxs], 
+                                     data.neg_samples[:,link_idxs])
+                if all_preds is None:
+                    all_preds = pred.to('cpu')
+                    all_labels = labels.to('cpu')
+                else:
+                    all_preds = torch.concat([all_preds, pred.to('cpu')])
+                    all_labels = torch.concat([all_labels, labels.to('cpu')])
+        
+        return all_labels.numpy().flatten(), all_preds.numpy().flatten()
 
 if __name__ == '__main__':
     import pandas as pd
@@ -108,7 +142,7 @@ if __name__ == '__main__':
                               num_layers=3).to(device)
     model = Model(node_embedder, link_pred)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[300], gamma=0.8) 
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[300], gamma=0.1) 
     # scheduler = None
 
     encoding_path = './data/input_encoding.pt'
@@ -124,16 +158,17 @@ if __name__ == '__main__':
     g.x = node_encodings 
     
     g = split_data_stratified(g, data.num_nodes) # create neg samples and train/val/test splits 
-    g.edge_attr = F.one_hot(g.edge_attr)
+    g.edge_attr = F.one_hot(g.edge_attr).float()
 
     train_epochs = args.epochs
     batch_size = args.batch_size
+    eval_batch_size = 150000
     max_f1 = 0
     train_losses = {'epoch':[],'train loss':[], 'val loss':[]}
     experiment_name = args.name if not args.name is None else ''
     for epoch in range(train_epochs):
         train_loss = train(model, optimizer, g, batch_size=batch_size, scheduler=scheduler)
-        val_loss, val_precision, val_recall, val_f1 = val(model, g)
+        val_loss, val_precision, val_recall, val_f1 = val(model, g, batch_size=eval_batch_size)
         train_losses['epoch'].append(epoch)
         train_losses['train loss'].append(train_loss)
         train_losses['val loss'].append(val_loss)
@@ -145,7 +180,7 @@ if __name__ == '__main__':
     best_model = Model(node_embedder, link_pred)
     best_model.load_state_dict(torch.load('.best_model.pth'))    
     best_model = best_model.to(device)
-    y_true, y_pred = test(best_model, g)
+    y_true, y_pred = test(best_model, g, batch_size=eval_batch_size)
     results = pd.DataFrame({'y_true': y_true, 'y_pred':y_pred})
     results.to_csv(f'{experiment_name}-results.csv')
     losses = pd.DataFrame(train_losses)
