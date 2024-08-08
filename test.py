@@ -73,8 +73,6 @@ if __name__ == '__main__':
     node_encodings = node_embedder.load_input_encodings(encoding_path).to(device)
     print('Loaded pre-computed BERT encodings.')
     g.x = node_encodings 
-    
-    g = split_data_stratified(g, data.num_nodes) # create neg samples and train/val/test splits 
     g.edge_attr = F.one_hot(g.edge_attr).float()
 
     eval_batch_size = 150000

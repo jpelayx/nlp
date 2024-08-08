@@ -154,9 +154,9 @@ if __name__ == '__main__':
     node_embedder = NodeEmbedder(input_dim=768,
                                  hidden_dim=64,
                                  output_dim=128,
-                                 num_heads=4,
-                                 num_layers=1, 
-                                 dropout=0.2)
+                                 num_heads=2,
+                                 num_layers=2, 
+                                 dropout=0.3)
     link_pred = LinkPredictor(input_dim=128, 
                               hidden_dim=256,
                               output_dim=3,
@@ -167,8 +167,8 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load('.best_model.pth'))    
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5) 
-    # scheduler = None
+    # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[200], gamma=0.5) 
+    scheduler = None
 
     encoding_path = './data/input_encoding.pt'
     if not os.path.exists(encoding_path):
@@ -181,8 +181,6 @@ if __name__ == '__main__':
         node_encodings = node_embedder.load_input_encodings(encoding_path).to(device)
         print('Loaded pre-computed BERT encodings.')
     g.x = node_encodings 
-    
-    g = split_data_stratified(g, data.num_nodes) # create neg samples and train/val/test splits 
     g.edge_attr = F.one_hot(g.edge_attr).float()
 
     train_epochs = args.epochs

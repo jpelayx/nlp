@@ -24,7 +24,6 @@ class RelationsDS(InMemoryDataset):
         
         super().__init__(root, transform, pre_transform, pre_filter)
         self.load(self.processed_paths[0])
-        self.num_nodes = self[0].token_ids.shape[0]
 
     @property
     def raw_file_names(self):
@@ -78,14 +77,46 @@ class RelationsDS(InMemoryDataset):
         token_mask = tokens.attention_mask
         token_type_ids = tokens.token_type_ids 
 
-        data = Data()
-        data.edge_index = torch.tensor(edge_index, dtype=torch.long)
-        data.edge_attr = torch.tensor(edge_attr, dtype=torch.long)
-        data.token_ids = token_ids
-        data.token_mask = token_mask
-        data.token_type_ids = token_type_ids
+        device = 'cuda'
+        data = Data().to(device)
+        data.num_nodes = ids.shape[0]
+        data.edge_index = torch.tensor(edge_index, dtype=torch.long, device=device)
+        data.edge_attr = torch.tensor(edge_attr, dtype=torch.long, device=device)
+        data.token_ids = token_ids.to(device)
+        data.token_mask = token_mask.to(device)
+        data.token_type_ids = token_type_ids.to(device)
 
-        return [data]
+        data = self._create_splits(data, device)
+        data = self._add_self_loops(data, data.num_nodes, device)
+
+        return [data.to('cpu')]
+    
+    def _create_splits(self, data, device):
+        src, tar, neg = structured_negative_sampling(data.edge_index,
+                                                     contains_neg_self_loops=False)
+        data.pos_samples = torch.stack([src, tar])
+        data.neg_samples = torch.stack([src, neg])
+    
+        mask = torch.arange(src.shape[0], device='cpu')
+        labels = data.edge_attr.to('cpu')
+        train_mask, test_mask = train_test_split(mask, test_size=0.2, stratify=labels)
+        train_mask, val_mask = train_test_split(train_mask, test_size=0.2, stratify=labels[train_mask])
+        data.train_mask = train_mask.to(device)
+        data.val_mask = val_mask.to(device)
+        data.test_mask = test_mask.to(device)
+        data.y = labels.to(device)
+        data.edge_index = data.edge_index[:,data.train_mask]
+        data.edge_attr = data.edge_attr[data.train_mask]
+        return data
+    
+    def _add_self_loops(self, data, num_nodes, device):
+        edge_index_i = torch.cat([data.edge_index[0], torch.arange(num_nodes, dtype=torch.int64, device=device)]) 
+        edge_index_j = torch.cat([data.edge_index[1], torch.arange(num_nodes, dtype=torch.int64, device=device)]) 
+        data.edge_index = torch.stack([edge_index_i, edge_index_j])
+        
+        data.edge_attr = torch.cat([data.edge_attr, torch.zeros(num_nodes, dtype=torch.long, device=device)])
+        
+        return data
 
     def _compose_definition(self, arg):
         id, definition = arg
