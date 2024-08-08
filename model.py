@@ -12,7 +12,15 @@ import numpy as np
 import os.path
 
 class NodeEmbedder(Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, num_heads, encoder=None) -> None:
+    def __init__(self,
+                 input_dim,
+                 hidden_dim, 
+                 output_dim, 
+                 num_layers, 
+                 num_heads, 
+                 dropout=None,
+                 encoder=None
+    ) -> None:
         super().__init__()
 
         if encoder is None:
@@ -21,6 +29,7 @@ class NodeEmbedder(Module):
             param.requires_grad = False
         self._default_encoding_path = 'data/input_encoding.pt'
 
+        self.dropout = dropout
         self.num_layers = num_layers
         self.conv_layers = ModuleList()
         self.conv_layers.append(GATv2Conv(input_dim, 
@@ -83,13 +92,22 @@ class NodeEmbedder(Module):
         for conv in self.conv_layers:
             x = conv(x, edge_index, edge_attr)
             x = F.relu(x)
+            if not self.dropout is None:
+                x = F.dropout(x, p=self.dropout, training=self.training)
         
         return self.out(x)
 
 class LinkPredictor(Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers) -> None:
+    def __init__(self, 
+                 input_dim, 
+                 hidden_dim, 
+                 output_dim, 
+                 num_layers, 
+                 dropout=None
+    ) -> None:
         super().__init__()
 
+        self.dropout = dropout
         self.num_layers = num_layers
         self.linear_layers = ModuleList()
         self.linear_layers.append(nn.Linear(input_dim, hidden_dim))
@@ -102,6 +120,8 @@ class LinkPredictor(Module):
         for linear in self.linear_layers[:-1]:
             x = linear(x)
             x = F.relu(x)
+            if not self.dropout is None:
+                x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.linear_layers[-1](x)
         # return torch.sigmoid(x)
         return x

@@ -42,7 +42,6 @@ def train(model, optimizer, data, batch_size=None, scheduler=None):
                           data.edge_index, 
                           data.edge_attr,
                           target_links) 
-            print(target_links.shape, labels.shape, preds.shape)
             loss = F.cross_entropy(preds, labels)
             loss.backward()
             optimizer.step()
@@ -152,17 +151,18 @@ if __name__ == '__main__':
     g = data[0]
 
     node_embedder = NodeEmbedder(input_dim=768,
-                                 hidden_dim=256,
+                                 hidden_dim=128,
                                  output_dim=256,
-                                 num_heads=1,
+                                 num_heads=2,
                                  num_layers=2).to(device)
     link_pred = LinkPredictor(input_dim=256, 
                               hidden_dim=128,
                               output_dim=3,
-                              num_layers=3).to(device)
+                              num_layers=3, 
+                              dropout=0.2).to(device)
     model = Model(node_embedder, link_pred)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[300], gamma=0.1) 
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[300], gamma=0.5) 
     # scheduler = None
 
     encoding_path = './data/input_encoding.pt'
@@ -201,7 +201,12 @@ if __name__ == '__main__':
     best_model.load_state_dict(torch.load('.best_model.pth'))    
     best_model = best_model.to(device)
     y_true, y_pred = test(best_model, g, batch_size=eval_batch_size)
-    results = pd.DataFrame({'y_true': y_true, 'y_pred':y_pred})
+    
+    results = {'y_true': y_true, 
+               'y_pred_neg': y_pred[:,0],
+               'y_pred_hyp': y_pred[:,1],
+               'y_pred_hol': y_pred[:,2]}
+    results = pd.DataFrame(results)
     results.to_csv(f'{experiment_name}-results.csv')
     losses = pd.DataFrame(train_losses)
     losses.to_csv(f'{experiment_name}-train_losses.csv')
