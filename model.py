@@ -39,12 +39,17 @@ class NodeEmbedder(Module):
                                           num_heads,
                                           edge_dim=3,
                                           add_self_loops=False))
+        self.lin_layers = ModuleList()
+        self.lin_layers.append(nn.Linear(hidden_dim*num_heads, 
+                                         hidden_dim*num_heads))
         for _ in range(num_layers-1):
             self.conv_layers.append(GATv2Conv(hidden_dim*num_heads,
                                               hidden_dim,
                                               num_heads,
                                               edge_dim=3,
                                               add_self_loops=False))
+            self.lin_layers.append(nn.Linear(hidden_dim*num_heads, 
+                                             hidden_dim*num_heads))
 
         self.out = Sequential(
             nn.Linear(hidden_dim*num_heads, hidden_dim),
@@ -91,8 +96,10 @@ class NodeEmbedder(Module):
 
             x = self.encode_inputs(x)
             self.save_input_encodings(x)
-        for conv in self.conv_layers:
-            x = conv(x, edge_index, edge_attr)
+        for l in range(self.num_layers):
+            x = self.conv_layers[l](x, edge_index, edge_attr)
+            # x = F.relu(x)
+            x = self.lin_layers[l](x)
             x = F.relu(x)
             if not self.dropout is None:
                 x = F.dropout(x, p=self.dropout, training=self.training)
