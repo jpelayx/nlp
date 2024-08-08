@@ -19,14 +19,16 @@ class NodeEmbedder(Module):
                  num_layers, 
                  num_heads, 
                  dropout=None,
+                 use_precomputed_encodings=True,
                  encoder=None
     ) -> None:
         super().__init__()
 
-        if encoder is None:
-            self.encoder = BertModel.from_pretrained('bert-base-uncased')
-        for param in self.encoder.parameters():
-            param.requires_grad = False
+        if not use_precomputed_encodings:
+            if encoder is None:
+                self.encoder = BertModel.from_pretrained('bert-base-uncased')
+            for param in self.encoder.parameters():
+                param.requires_grad = False
         self._default_encoding_path = 'data/input_encoding.pt'
 
         self.dropout = dropout

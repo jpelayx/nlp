@@ -144,6 +144,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', '-b', type=int, default=None)
     parser.add_argument('--epochs', '-e', type=int, default=500)
     parser.add_argument('--name', '-n', type=str, default=None)
+    parser.add_argument('--continue_training', '-c', action='store_true')
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -151,18 +152,22 @@ if __name__ == '__main__':
     g = data[0]
 
     node_embedder = NodeEmbedder(input_dim=768,
-                                 hidden_dim=128,
-                                 output_dim=256,
-                                 num_heads=2,
-                                 num_layers=2).to(device)
-    link_pred = LinkPredictor(input_dim=256, 
-                              hidden_dim=128,
+                                 hidden_dim=64,
+                                 output_dim=128,
+                                 num_heads=4,
+                                 num_layers=1, 
+                                 dropout=0.2)
+    link_pred = LinkPredictor(input_dim=128, 
+                              hidden_dim=256,
                               output_dim=3,
                               num_layers=3, 
-                              dropout=0.2).to(device)
+                              dropout=0.3)
     model = Model(node_embedder, link_pred)
+    if args.continue_training:
+        model.load_state_dict(torch.load('.best_model.pth'))    
+    model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[300], gamma=0.5) 
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150], gamma=0.5) 
     # scheduler = None
 
     encoding_path = './data/input_encoding.pt'
@@ -183,7 +188,10 @@ if __name__ == '__main__':
     train_epochs = args.epochs
     batch_size = args.batch_size
     eval_batch_size = 150000
-    max_f1 = 0
+    if args.continue_training:
+        _, _, _, max_f1 = val(model, g, batch_size=eval_batch_size)
+    else:
+        max_f1 = 0
     train_losses = {'epoch':[],'train loss':[], 'val loss':[]}
     experiment_name = args.name if not args.name is None else ''
     for epoch in range(train_epochs):
