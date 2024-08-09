@@ -134,19 +134,24 @@ class LinkPredictor(Module):
             _ = (hd for hd in hidden_dim)
         except:
             hidden_dim = torch.tensor([hidden_dim]).repeat(num_layers-1)
+        self.normalization_layers = ModuleList()
+        self.normalization_layers.append(BatchNorm(input_dim))
         self.linear_layers = ModuleList()
         self.linear_layers.append(nn.Linear(input_dim, hidden_dim[0]))
         for l in range(num_layers - 2):
+            self.normalization_layers.append(BatchNorm(hidden_dim[l]))
             self.linear_layers.append(nn.Linear(hidden_dim[l], hidden_dim[l+1]))
         self.linear_layers.append(nn.Linear(hidden_dim[-1], output_dim))
 
     def forward(self, x_i, x_j):
         x = x_i * x_j
-        for linear in self.linear_layers[:-1]:
-            x = linear(x)
+        for l in range(self.num_layers-1):
+            x = self.normalization_layers[l](x)
+            x = self.linear_layers[l](x)
             x = F.relu(x)
             if not self.dropout is None:
                 x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.normalization_layers[-1](x)
         x = self.linear_layers[-1](x)
         # return torch.sigmoid(x)
         return x
