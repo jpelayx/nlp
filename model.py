@@ -24,6 +24,12 @@ class NodeEmbedder(Module):
     ) -> None:
         super().__init__()
 
+        if num_layers == 0:
+            self._fake = True
+            return 
+        else:
+            self._fake = False
+
         if not use_precomputed_encodings:
             if encoder is None:
                 self.encoder = BertModel.from_pretrained('bert-base-uncased')
@@ -96,6 +102,9 @@ class NodeEmbedder(Module):
 
             x = self.encode_inputs(x)
             self.save_input_encodings(x)
+        if self._fake:
+            return x
+        
         for l in range(self.num_layers):
             x = self.conv_layers[l](x, edge_index, edge_attr)
             # x = F.relu(x)
