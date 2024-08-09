@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from torch.nn import Module, ModuleList, Sequential
 from torch.utils.data import DataLoader
-from torch_geometric.nn import GCNConv, GATv2Conv
+from torch_geometric.nn import GCNConv, GATv2Conv, BatchNorm
 from transformers import BertModel
 
 import numpy as np
@@ -39,6 +39,8 @@ class NodeEmbedder(Module):
 
         self.dropout = dropout
         self.num_layers = num_layers
+        self.norm_layers = ModuleList()
+        self.norm_layers.append(BatchNorm(input_dim))
         self.conv_layers = ModuleList()
         self.conv_layers.append(GATv2Conv(input_dim, 
                                           hidden_dim, 
@@ -49,6 +51,7 @@ class NodeEmbedder(Module):
         self.lin_layers.append(nn.Linear(hidden_dim*num_heads, 
                                          hidden_dim*num_heads))
         for _ in range(num_layers-1):
+            self.norm_layers.append(BatchNorm(hidden_dim*num_heads))
             self.conv_layers.append(GATv2Conv(hidden_dim*num_heads,
                                               hidden_dim,
                                               num_heads,
@@ -56,6 +59,7 @@ class NodeEmbedder(Module):
                                               add_self_loops=False))
             self.lin_layers.append(nn.Linear(hidden_dim*num_heads, 
                                              hidden_dim*num_heads))
+
 
         self.out = Sequential(
             nn.Linear(hidden_dim*num_heads, hidden_dim),
@@ -106,8 +110,8 @@ class NodeEmbedder(Module):
             return x
         
         for l in range(self.num_layers):
+            x = self.norm_layers[l](x)
             x = self.conv_layers[l](x, edge_index, edge_attr)
-            # x = F.relu(x)
             x = self.lin_layers[l](x)
             x = F.relu(x)
             if not self.dropout is None:
