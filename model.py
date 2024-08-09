@@ -115,14 +115,17 @@ class LinkPredictor(Module):
                  dropout=None
     ) -> None:
         super().__init__()
-
         self.dropout = dropout
         self.num_layers = num_layers
+        try:
+            _ = (hd for hd in hidden_dim)
+        except:
+            hidden_dim = torch.tensor([hidden_dim]).repeat(num_layers-1)
         self.linear_layers = ModuleList()
-        self.linear_layers.append(nn.Linear(input_dim, hidden_dim))
-        for _ in range(num_layers - 2):
-            self.linear_layers.append(nn.Linear(hidden_dim, hidden_dim))
-        self.linear_layers.append(nn.Linear(hidden_dim, output_dim))
+        self.linear_layers.append(nn.Linear(input_dim, hidden_dim[0]))
+        for l in range(num_layers - 2):
+            self.linear_layers.append(nn.Linear(hidden_dim[l], hidden_dim[l+1]))
+        self.linear_layers.append(nn.Linear(hidden_dim[-1], output_dim))
 
     def forward(self, x_i, x_j):
         x = x_i * x_j
