@@ -108,7 +108,7 @@ class NodeEmbedder(Module):
             self.save_input_encodings(x)
         if self._fake:
             return x
-        
+        x_0 = x        
         for l in range(self.num_layers):
             x = self.norm_layers[l](x)
             x = self.conv_layers[l](x, edge_index, edge_attr)
@@ -116,6 +116,7 @@ class NodeEmbedder(Module):
             x = F.relu(x)
             if not self.dropout is None:
                 x = F.dropout(x, p=self.dropout, training=self.training)
+        x = x_0 + x
         
         return self.out(x)
 
