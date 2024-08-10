@@ -65,16 +65,16 @@ if __name__ == '__main__':
     g = data[0]
 
     node_embedder = NodeEmbedder(input_dim=768,
-                                 hidden_dim=768,
-                                 output_dim=512,
+                                 hidden_dim=512,
+                                 output_dim=256,
                                  num_heads=1,
                                  num_layers=1, 
                                  dropout=0.5)
-    link_pred = LinkPredictor(input_dim=512, 
-                              hidden_dim=[256, 128],
+    link_pred = LinkPredictor(input_dim=256, 
+                              hidden_dim=[128, 64],
                               output_dim=3,
                               num_layers=3, 
-                              dropout=0.3)
+                              dropout=0.5)
     model = Model(node_embedder, link_pred)
     model.load_state_dict(torch.load('.best_model.pth'))    
     model = model.to(device)
@@ -88,14 +88,14 @@ if __name__ == '__main__':
     eval_batch_size = 150000
     experiment_name = args.name if not args.name is None else ''
 
-    if args.store_links:
+    if args.save_links:
         y_true, y_pred, links = test(model, g, batch_size=eval_batch_size, return_links=True)
         results = {'y_true': y_true, 
                    'y_pred_neg': y_pred[:,0],
                    'y_pred_hyp': y_pred[:,1],
                    'y_pred_hol': y_pred[:,2], 
-                   'edge_i': links[:,0], 
-                   'edge_j': links[:,1]}
+                   'edge_i': links[0,:], 
+                   'edge_j': links[1,:]}
     else:
         y_true, y_pred = test(model, g, batch_size=eval_batch_size)
         results = {'y_true': y_true, 
