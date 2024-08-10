@@ -152,22 +152,22 @@ if __name__ == '__main__':
     g = data[0]
 
     node_embedder = NodeEmbedder(input_dim=768,
-                                 hidden_dim=64,
-                                 output_dim=128,
-                                 num_heads=2,
-                                 num_layers=2, 
-                                 dropout=0.3)
-    link_pred = LinkPredictor(input_dim=128, 
-                              hidden_dim=256,
+                                 hidden_dim=512,
+                                 output_dim=256,
+                                 num_heads=1,
+                                 num_layers=1, 
+                                 dropout=0.5)
+    link_pred = LinkPredictor(input_dim=256, 
+                              hidden_dim=[128, 64],
                               output_dim=3,
                               num_layers=3, 
-                              dropout=0.3)
+                              dropout=0.5)
     model = Model(node_embedder, link_pred)
     if args.continue_training:
         model.load_state_dict(torch.load('.best_model.pth'))    
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)  
-    # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[200], gamma=0.5) 
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[700], gamma=0.8) 
     scheduler = None
 
     encoding_path = './data/input_encoding.pt'

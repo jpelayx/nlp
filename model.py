@@ -142,6 +142,7 @@ class LinkPredictor(Module):
             self.normalization_layers.append(BatchNorm(hidden_dim[l]))
             self.linear_layers.append(nn.Linear(hidden_dim[l], hidden_dim[l+1]))
         self.linear_layers.append(nn.Linear(hidden_dim[-1], output_dim))
+        self.normalization_layers.append(BatchNorm(hidden_dim[-1]))
 
     def forward(self, x_i, x_j):
         x = x_i * x_j

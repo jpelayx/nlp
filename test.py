@@ -56,15 +56,16 @@ if __name__ == '__main__':
     g = data[0]
 
     node_embedder = NodeEmbedder(input_dim=768,
-                                 hidden_dim=128,
-                                 output_dim=256,
-                                 num_heads=2,
-                                 num_layers=2)
-    link_pred = LinkPredictor(input_dim=256, 
-                              hidden_dim=128,
+                                 hidden_dim=768,
+                                 output_dim=512,
+                                 num_heads=1,
+                                 num_layers=1, 
+                                 dropout=0.5)
+    link_pred = LinkPredictor(input_dim=512, 
+                              hidden_dim=[256, 128],
                               output_dim=3,
                               num_layers=3, 
-                              dropout=0.2)
+                              dropout=0.3)
     model = Model(node_embedder, link_pred)
     model.load_state_dict(torch.load('.best_model.pth'))    
     model = model.to(device)
