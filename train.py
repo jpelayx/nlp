@@ -152,15 +152,15 @@ if __name__ == '__main__':
     g = data[0]
 
     node_embedder = NodeEmbedder(input_dim=768,
-                                 hidden_dim=512,
-                                 output_dim=256,
+                                 hidden_dim=768,
+                                 output_dim=512,
                                  num_heads=1,
                                  num_layers=1, 
                                  dropout=0.5)
-    link_pred = LinkPredictor(input_dim=256, 
-                              hidden_dim=[128, 64],
+    link_pred = LinkPredictor(input_dim=512, 
+                              hidden_dim=[256, 128, 64],
                               output_dim=3,
-                              num_layers=3, 
+                              num_layers=4, 
                               dropout=0.5)
     model = Model(node_embedder, link_pred)
     if args.continue_training:
