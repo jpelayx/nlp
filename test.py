@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 import os.path
 
-def test(model, data, batch_size=None):
+def test(model, data, batch_size=None, return_links=False):
     model.eval()
     with torch.no_grad():
         if batch_size is None:
@@ -20,6 +20,8 @@ def test(model, data, batch_size=None):
                           data.edge_attr,
                           target_links) 
             all_preds, all_labels = preds.to('cpu'), labels.to('cpu')
+            if return_links:
+                all_links = target_links.to('cpu')
         else:
             all_preds, all_labels = None, None
             link_loader = DataLoader(data.test_mask,
@@ -37,11 +39,17 @@ def test(model, data, batch_size=None):
                 if all_preds is None:
                     all_preds = preds.to('cpu')
                     all_labels = labels.to('cpu')
+                    if return_links:
+                        all_links = target_links.to('cpu')
                 else:
                     all_preds = torch.concat([all_preds, preds.to('cpu')])
                     all_labels = torch.concat([all_labels, labels.to('cpu')])
-        
-        return all_labels.numpy(), all_preds.numpy()
+                    if return_links:
+                        all_links = torch.concat([all_links, target_links.to('cpu')])
+        if return_links:
+            return all_labels.numpy(), all_preds.numpy(), all_links.numpy()
+        else:
+            return all_labels.numpy(), all_preds.numpy()
 
 if __name__ == '__main__':
     import pandas as pd
@@ -49,6 +57,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', '-n', type=str, default=None)
+    parser.add_argument('--save_links', '-s', action='store_true')
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -79,11 +88,20 @@ if __name__ == '__main__':
     eval_batch_size = 150000
     experiment_name = args.name if not args.name is None else ''
 
-    y_true, y_pred = test(model, g, batch_size=eval_batch_size)
-    results = {'y_true': y_true, 
-               'y_pred_neg': y_pred[:,0],
-               'y_pred_hyp': y_pred[:,1],
-               'y_pred_hol': y_pred[:,2]}
+    if args.store_links:
+        y_true, y_pred, links = test(model, g, batch_size=eval_batch_size, return_links=True)
+        results = {'y_true': y_true, 
+                   'y_pred_neg': y_pred[:,0],
+                   'y_pred_hyp': y_pred[:,1],
+                   'y_pred_hol': y_pred[:,2], 
+                   'edge_i': links[:,0], 
+                   'edge_j': links[:,1]}
+    else:
+        y_true, y_pred = test(model, g, batch_size=eval_batch_size)
+        results = {'y_true': y_true, 
+                   'y_pred_neg': y_pred[:,0],
+                   'y_pred_hyp': y_pred[:,1],
+                   'y_pred_hol': y_pred[:,2]}
     results = pd.DataFrame(results)
     results.to_csv(f'{experiment_name}-results.csv')
 
