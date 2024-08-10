@@ -135,9 +135,9 @@ class LinkPredictor(Module):
         except:
             hidden_dim = torch.tensor([hidden_dim]).repeat(num_layers-1)
         self.normalization_layers = ModuleList()
-        self.normalization_layers.append(BatchNorm(input_dim))
+        self.normalization_layers.append(BatchNorm(input_dim*2))
         self.linear_layers = ModuleList()
-        self.linear_layers.append(nn.Linear(input_dim, hidden_dim[0]))
+        self.linear_layers.append(nn.Linear(input_dim*2, hidden_dim[0]))
         for l in range(num_layers - 2):
             self.normalization_layers.append(BatchNorm(hidden_dim[l]))
             self.linear_layers.append(nn.Linear(hidden_dim[l], hidden_dim[l+1]))
@@ -145,7 +145,7 @@ class LinkPredictor(Module):
         self.normalization_layers.append(BatchNorm(hidden_dim[-1]))
 
     def forward(self, x_i, x_j):
-        x = x_i * x_j
+        x = torch.cat([x_i, x_j], dim=1)
         for l in range(self.num_layers-1):
             x = self.normalization_layers[l](x)
             x = self.linear_layers[l](x)
