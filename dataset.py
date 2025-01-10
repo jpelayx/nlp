@@ -1,8 +1,9 @@
 import torch
-from torch_geometric.data import InMemoryDataset, Data
+from torch.utils.data import TensorDataset
+from torch_geometric.data import InMemoryDataset, Data, DataLoader
 from torch_geometric.utils import structured_negative_sampling
 from sklearn.model_selection import train_test_split
-from transformers import BertTokenizer
+from transformers import BertTokenizer, BertModel
 
 import pandas as pd 
 import numpy as np
@@ -24,19 +25,30 @@ class WN18RR(InMemoryDataset):
         '_verb_group': 9,
         '_similar_to': 10
     }
-    def __init__(self, root, split='train', tokenizer=None, transform=None, pre_transform=None, pre_filter=None):
-        self._split = self._split_map(split)
+    def __init__(
+        self, root, split='train', 
+        tokenizer=None, encoder=None, 
+        transform=None, pre_transform=None, pre_filter=None, 
+        force_reload=False, 
+        skip_encoding=False, 
+        verbose_processing = False,
+        encoder_batch_size = 1024
+    ):
         self.root = root
-        if tokenizer is None:
-            self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        else:
-            self.tokenizer = tokenizer
+        self.tokenizer = tokenizer
+        self.encoder = encoder
         
+        self._split = self._split_map(split)
+        self._force_reload = force_reload
+        self._skip_encoding = skip_encoding
+        self._verbose_processing = verbose_processing
+        self._encoder_batch_size = encoder_batch_size
+
         super().__init__(root, transform, pre_transform, pre_filter)
         self.load(self.processed_paths[self._split])
 
     def process(self):
-        if self._already_processed():
+        if self._already_processed() and not self._force_reload:
             return
 
         definitions_file = os.path.join(self.root, 'definitions.txt')
@@ -49,16 +61,6 @@ class WN18RR(InMemoryDataset):
         )
         entity_mapping = {name : i for i, name in enumerate(definitions.index)}
 
-        if os.path.exists(os.path.join(self.root, 'tokens.pt')):
-            tokens = torch.load(os.path.join(self.root, 'tokens.pt'))
-        else:
-            augmented_definitions = self._compose_definitions(definitions)
-            tokens = self.tokenizer(
-                list(augmented_definitions),
-                padding="max_length", 
-                return_tensors='pt', 
-                add_special_tokens=True
-            )
 
         relations_file = os.path.join(self.root, self.raw_file_names[self._split])
         relations = pd.read_csv(
@@ -74,14 +76,92 @@ class WN18RR(InMemoryDataset):
             relations['relation'].map(self.edge2id.get).to_numpy(), dtype=torch.long
         ).unsqueeze(1)
         
-        data = Data(
-            edge_index=edge_index,
-            edge_attr=edge_attr,
-            token_ids=tokens.input_ids,
-            token_mask=tokens.attention_mask,
-            token_type_ids=tokens.token_type_ids
-        )
+        augmented_definitions = self._compose_definitions(definitions) 
+        tokens = self._tokenize(augmented_definitions)
+        if self._skip_encoding:
+            data = Data(
+                edge_index=edge_index,
+                edge_attr=edge_attr,
+                token_ids=tokens.input_ids,
+                token_mask=tokens.attention_mask,
+                token_type_ids=tokens.token_type_ids
+            )
+        else:
+            encodings = self._encode(tokens)
+            data = Data(
+                edge_index=edge_index,
+                edge_attr=edge_attr,
+                x=encodings
+            )
+
         self.save([data], self.processed_paths[self._split])
+    
+    def _tokenize(self, definitions):
+        if os.path.exists(os.path.join(self.root, 'tokens.pt')):
+            if self._verbose_processing:
+                print('Loading tokens from file')
+            return torch.load(os.path.join(self.root, 'tokens.pt'))
+
+        if not self.tokenizer is None:
+            tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        else:
+            tokenizer = self.tokenizer
+            del self.tokenizer
+
+        if self._verbose_processing:
+            print('Tokenizing definitions... ', end='')
+        tokens = tokenizer(
+            list(definitions),
+            padding="max_length", 
+            return_tensors='pt', 
+            add_special_tokens=True
+        )
+        if self._verbose_processing:
+            print('done')
+        return tokens
+    
+    def _encode(self, tokens):
+        if os.path.exists(os.path.join(self.root, 'encodings.pt')):
+            if self._verbose_processing:
+                print('Loading encodings from file')
+            return torch.load(os.path.join(self.root, 'encodings.pt'))
+
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        if self._verbose_processing:    
+            print('Encoding device is', device) 
+
+        if self.encoder is None:
+            encoder = BertModel.from_pretrained('bert-base-uncased')
+        else:
+            encoder = self.encoder
+            del self.encoder
+
+        encoder = encoder.to(device)
+        
+        tokens = TensorDataset(
+            tokens.input_ids.to(device), 
+            tokens.attention_mask.to(device), 
+            tokens.token_type_ids.to(device)
+        )
+
+        batch_size = self._encoder_batch_size
+        token_loader = DataLoader(tokens, batch_size)
+        num_batches = len(token_loader)
+        encodings = None
+        if self._verbose_processing:
+            print('Encoding definitions... ')
+        for batch_idx, (id, mask, type_id) in enumerate(token_loader):
+            if self._verbose_processing and (batch_idx % 10*batch_size == 0):
+                print(f'\tBatch {batch_idx}/{num_batches}')
+            batch_encoding = encoder(id,
+                                     mask,
+                                     type_id).last_hidden_state[:,0,:]
+            if encodings is None: 
+                encodings = batch_encoding
+            else:
+                encodings = torch.concat([encodings, batch_encoding])
+        torch.save(encodings, os.path.join(self.root, 'encodings.pt'))
+        return encodings.to(device)
 
     def _already_processed(self):
         path = os.path.join(self.root, self.processed_file_names[self._split])
@@ -119,7 +199,7 @@ class WN18RR(InMemoryDataset):
         elif split == 'test':
             return 2
         else:
-            raise ValueError('Invalid split name')
+            raise ValueError('Invalid split name. Choose from "train", "validation" or "test"')
 
     @property
     def raw_file_names(self):
@@ -319,5 +399,12 @@ def split_data_stratified(g, num_nodes, add_self_loops=True):
     g.edge_attr  = edge_attr
 
     return g
+
+if __name__ == '__main__':
+    train  = WN18RR(
+        'data/WN18RR', 
+        split='train',
+        encoder_batch_size=1024,
+        verbose_processing=True)
 
     
