@@ -10,6 +10,132 @@ import numpy as np
 import os.path 
 import re
 
+class WN18RR(InMemoryDataset):
+    edge2id = {
+        '_hypernym': 0,
+        '_derivationally_related_form': 1,
+        '_instance_hypernym': 2,
+        '_also_see': 3,
+        '_member_meronym': 4,
+        '_synset_domain_topic_of': 5,
+        '_has_part': 6,
+        '_member_of_domain_usage': 7,
+        '_member_of_domain_region': 8,
+        '_verb_group': 9,
+        '_similar_to': 10
+    }
+    def __init__(self, root, split='train', tokenizer=None, transform=None, pre_transform=None, pre_filter=None):
+        self._split = self._split_map(split)
+        self.root = root
+        if tokenizer is None:
+            self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        else:
+            self.tokenizer = tokenizer
+        
+        super().__init__(root, transform, pre_transform, pre_filter)
+        self.load(self.processed_paths[self._split])
+
+    def process(self):
+        if self._already_processed():
+            return
+
+        definitions_file = os.path.join(self.root, 'definitions.txt')
+
+        definitions = pd.read_csv(
+            definitions_file, sep='\t', 
+            header=None, 
+            index_col=0,
+            names=['id', 'definition']
+        )
+        entity_mapping = {name : i for i, name in enumerate(definitions.index)}
+
+        if os.path.exists(os.path.join(self.root, 'tokens.pt')):
+            tokens = torch.load(os.path.join(self.root, 'tokens.pt'))
+        else:
+            augmented_definitions = self._compose_definitions(definitions)
+            tokens = self.tokenizer(
+                list(augmented_definitions),
+                padding="max_length", 
+                return_tensors='pt', 
+                add_special_tokens=True
+            )
+
+        relations_file = os.path.join(self.root, self.raw_file_names[self._split])
+        relations = pd.read_csv(
+            relations_file, 
+            sep="\t", 
+            header=None, 
+            names=["id", "relation", "related_id"]
+        )
+        edge_index = torch.tensor(
+            relations[['id', 'related_id']].map(entity_mapping.get).to_numpy().T, dtype=torch.long
+        )
+        edge_attr = torch.tensor(
+            relations['relation'].map(self.edge2id.get).to_numpy(), dtype=torch.long
+        ).unsqueeze(1)
+        
+        data = Data(
+            edge_index=edge_index,
+            edge_attr=edge_attr,
+            token_ids=tokens.input_ids,
+            token_mask=tokens.attention_mask,
+            token_type_ids=tokens.token_type_ids
+        )
+        self.save([data], self.processed_paths[self._split])
+
+    def _already_processed(self):
+        path = os.path.join(self.root, self.processed_file_names[self._split])
+        return os.path.exists(path)
+
+    def _compose_definitions(self, defs):
+        pos_tags = {
+            'NN': 'noun',
+            'VB': 'verb',
+            'JJ': 'adjective',
+            'RB': 'adverb'
+        }
+
+        syn_parser = re.compile(r'__(.+)_([A-Z][A-Z])_(\d+)')
+
+        def augment_definition(synset):
+            id, definition = synset.loc["id"], synset.loc["definition"]
+            try:
+                syn, pos, _ = syn_parser.match(id).groups()
+            except:
+                print(id)
+                return ''
+            syn = re.sub(r'_', ' ', syn)
+            pos = pos_tags[pos]
+            return f'the definition of the {pos} {syn} is {definition}'
+
+        return defs.apply(augment_definition, axis=1)
+    
+    
+    def _split_map(self, split):
+        if split == 'train':
+            return 0
+        elif split == 'validation':
+            return 1
+        elif split == 'test':
+            return 2
+        else:
+            raise ValueError('Invalid split name')
+
+    @property
+    def raw_file_names(self):
+        return ['train.txt', 'valid.txt', 'test.txt']
+    
+    @property
+    def processed_file_names(self):
+        return ['train.pt', 'valid.pt', 'test.pt']
+    
+    def download(self):
+        # Download to `self.raw_dir`.
+        return
+
+    
+
+
 class RelationsDS(InMemoryDataset):
     edge2id = {
         'Hypernyms': 1,
