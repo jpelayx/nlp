@@ -102,7 +102,7 @@ class WN18RR(InMemoryDataset):
                 print('Loading tokens from file')
             return torch.load(os.path.join(self.root, 'tokens.pt'))
 
-        if not self.tokenizer is None:
+        if self.tokenizer is None:
             tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         else:
             tokenizer = self.tokenizer
@@ -112,7 +112,7 @@ class WN18RR(InMemoryDataset):
             print('Tokenizing definitions... ', end='')
         tokens = tokenizer(
             list(definitions),
-            padding="max_length", 
+            padding="longest", 
             return_tensors='pt', 
             add_special_tokens=True
         )
@@ -139,9 +139,9 @@ class WN18RR(InMemoryDataset):
         encoder = encoder.to(device)
         
         tokens = TensorDataset(
-            tokens.input_ids.to(device), 
-            tokens.attention_mask.to(device), 
-            tokens.token_type_ids.to(device)
+            tokens.input_ids,
+            tokens.attention_mask, 
+            tokens.token_type_ids
         )
 
         batch_size = self._encoder_batch_size
@@ -150,18 +150,20 @@ class WN18RR(InMemoryDataset):
         encodings = None
         if self._verbose_processing:
             print('Encoding definitions... ')
-        for batch_idx, (id, mask, type_id) in enumerate(token_loader):
+        for batch_idx, (token_id, mask, type_id) in enumerate(token_loader):
             if self._verbose_processing and (batch_idx % 10*batch_size == 0):
                 print(f'\tBatch {batch_idx}/{num_batches}')
-            batch_encoding = encoder(id,
-                                     mask,
-                                     type_id).last_hidden_state[:,0,:]
+            batch_encoding = encoder(
+	        token_id.to(device),
+                mask.to(device),
+                type_id.to(device)
+            ).last_hidden_state[:,0,:]
             if encodings is None: 
-                encodings = batch_encoding
+                encodings = batch_encoding.to('cpu')
             else:
-                encodings = torch.concat([encodings, batch_encoding])
+                encodings = torch.concat([encodings, batch_encoding.to('cpu')])
         torch.save(encodings, os.path.join(self.root, 'encodings.pt'))
-        return encodings.to(device)
+        return encodings
 
     def _already_processed(self):
         path = os.path.join(self.root, self.processed_file_names[self._split])
@@ -402,9 +404,9 @@ def split_data_stratified(g, num_nodes, add_self_loops=True):
 
 if __name__ == '__main__':
     train  = WN18RR(
-        'data/WN18RR', 
+        'data/wn18rr', 
         split='train',
-        encoder_batch_size=1024,
+        encoder_batch_size=1,
         verbose_processing=True)
 
     
