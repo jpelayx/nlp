@@ -145,14 +145,22 @@ class WN18RR(InMemoryDataset):
         )
 
         batch_size = self._encoder_batch_size
-        token_loader = DataLoader(tokens, batch_size)
+        if os.path.exists(os.path.join(self.root, 'partial_encodings.pt')):
+            encodings = torch.load(os.path.join(self.root, 'partial_encodings.pt'))
+            start_idx = encodings.shape[0]
+            token_loader = DataLoader(tokens[start_idx:], batch_size)
+        else:
+            encodings = None
+            token_loader = DataLoader(tokens, batch_size)
         num_batches = len(token_loader)
         encodings = None
         if self._verbose_processing:
             print('Encoding definitions... ')
         for batch_idx, (token_id, mask, type_id) in enumerate(token_loader):
-            if self._verbose_processing and (batch_idx % 10*batch_size == 0):
-                print(f'\tBatch {batch_idx}/{num_batches}')
+            if batch_idx % 10*batch_size == 100 and batch_idx > 0:
+                torch.save(encodings, os.path.join(self.root, 'partial_encodings.pt'))
+                if self._verbose_processing:
+                    print(f'\tBatch {batch_idx}/{num_batches}')
             batch_encoding = encoder(
 	        token_id.to(device),
                 mask.to(device),
