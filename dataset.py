@@ -135,29 +135,30 @@ class WN18RR(InMemoryDataset):
         else:
             encoder = self.encoder
             del self.encoder
-
         encoder = encoder.to(device)
         
-        tokens = TensorDataset(
-            tokens.input_ids,
-            tokens.attention_mask, 
-            tokens.token_type_ids
-        )
-
         batch_size = self._encoder_batch_size
         if os.path.exists(os.path.join(self.root, 'partial_encodings.pt')):
             encodings = torch.load(os.path.join(self.root, 'partial_encodings.pt'))
             start_idx = encodings.shape[0]
-            token_loader = DataLoader(tokens[start_idx:], batch_size)
+            if self._verbose_processing:
+                print("Loading partial results from index", start_idx)
         else:
             encodings = None
-            token_loader = DataLoader(tokens, batch_size)
+            start_idx = 0
+
+        tokens = TensorDataset(
+            tokens.input_ids[start_idx:],
+            tokens.attention_mask[start_idx:], 
+            tokens.token_type_ids[start_idx:]
+        )
+        token_loader = DataLoader(tokens, batch_size)
         num_batches = len(token_loader)
-        encodings = None
+
         if self._verbose_processing:
             print('Encoding definitions... ')
         for batch_idx, (token_id, mask, type_id) in enumerate(token_loader):
-            if batch_idx % 10*batch_size == 100 and batch_idx > 0:
+            if batch_idx % 100*batch_size and batch_idx > 0:
                 torch.save(encodings, os.path.join(self.root, 'partial_encodings.pt'))
                 if self._verbose_processing:
                     print(f'\tBatch {batch_idx}/{num_batches}')
