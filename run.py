@@ -26,7 +26,7 @@ def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
     return total_loss / len(targets)
 
 
-def get_train_targets(g):
+def get_train_targets(g, device):
     target_edges, target_attrs = remove_self_loops(g.edge_index, g.edge_attr)
     target_labels = torch.ones(target_edges.shape[1], dtype=torch.float)
 
@@ -39,7 +39,7 @@ def get_train_targets(g):
     target_attrs = target_attrs.repeat(2, 1)
     target_labels = torch.cat([target_labels, torch.zeros_like(target_labels)])
 
-    targets = TensorDataset(target_edges.T, target_attrs, target_labels)
+    targets = TensorDataset(target_edges.T.to(device), target_attrs.to(device), target_labels.to(device))
     return targets
 
 
@@ -63,14 +63,17 @@ if __name__ == "__main__":
 
     model = Model(node_embedder, link_pred)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     g = WN18RR(root="data/wn18rr", split="train")[0].to(device)
     g.edge_attr = F.one_hot(g.edge_attr, 12).float().squeeze(1)
-    train_targets = get_train_targets(g)
+    train_targets = get_train_targets(g, device)
 
-    for epoch in range(10):
+    best_loss = 1
+    for epoch in range(100):
         t0 = time.time()
         loss = train(model, optimizer, g, train_targets, batch_size=1024)
         tf = time.time()
+        if loss < best_loss:
+            torch.save(model.state_dict(), 'best_model_weights.pt')
         print(f"Epoch {epoch} - Loss: {loss} ({tf - t0:.2f}s)")
