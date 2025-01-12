@@ -6,6 +6,8 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
 from torch_geometric.utils import structured_negative_sampling, remove_self_loops
 
+import time
+import pandas as pd
 
 def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
     model.train()
@@ -104,7 +106,7 @@ def get_validation_data(g, filter_data=None, save=None, load=None):
 
 
 def filter_edges(validation_data, train_data):
-    train_edges, train_attrs, _ = train_data.tensors
+    train_edges, train_attrs  = train_data
     mask = torch.ones(len(validation_data), dtype=torch.bool)
     for idx, (edge, attr) in enumerate(validation_data):
         repeated_edges = torch.isin(train_edges, edge)
@@ -125,7 +127,10 @@ def evaluate(model, g, validation_data, batch_size=None):
 
     batch_size = batch_size if batch_size else 1
     ranks = []
+    eval_time = 0
     for edge, attr in validation_data:
+        preds = []
+        t0 = time.time()
         with torch.no_grad():
             entity_loader = DataLoader(
                 node_embeddings, batch_size=batch_size, shuffle=False
@@ -134,14 +139,16 @@ def evaluate(model, g, validation_data, batch_size=None):
                 current_batch_size = xo.shape[0]
                 xs = node_embeddings[edge[0]].repeat(current_batch_size, 1)
                 xr = attr.repeat(current_batch_size, 1)
-                preds = model.link_predictor(xs, xr, xo)
-                ranks.append(torch.sum(preds > preds[edge[1]]).item())
+                preds.append(model.link_predictor(xs, xr, xo).to("cpu"))
+        tf = time.time()
+        preds = torch.cat(preds)
+        ranks.append(torch.sum(preds > preds[edge[1]]).item())
+        eval_time += tf - t0 
+    print(f"Total evaluation time: {eval_time:.2f}s ({eval_time/len(ranks):.2f} s/item)")    
     return ranks
 
 
 if __name__ == "__main__":
-    import time
-    import pandas as pd
     import argparse
 
     argparser = argparse.ArgumentParser()
@@ -172,7 +179,7 @@ if __name__ == "__main__":
     if args.load:
         model.load_state_dict(torch.load(args.load))
 
-    g = WN18RR(root="data/wn18rr", split="train")[0].to(device)
+    g = WN18RR(root="data/wn18rr", split="train", verbose_processing=True)[0].to(device)
     g.edge_attr = F.one_hot(g.edge_attr, 12).float().squeeze(1)
     train_targets = get_train_targets(g, device, load="data/wn18rr/train_targets.pt")
 
@@ -189,7 +196,7 @@ if __name__ == "__main__":
         model.load_state_dict(model_weights)
 
     if args.validate:
-        g_val = WN18RR(root="data/wn18rr", split="validation")[0].to(device)
+        g_val = WN18RR(root="data/wn18rr", split="validation", verbose_processing=True)[0].to(device)
         g_val.edge_attr = F.one_hot(g_val.edge_attr, 12).float().squeeze(1)
         validation_data = get_validation_data(
             g_val, filter_data=train_targets, save="data/wn18rr/validation_data.pt"
@@ -204,3 +211,4 @@ if __name__ == "__main__":
         )
 
     print("Done")
+

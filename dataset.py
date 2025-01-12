@@ -123,6 +123,7 @@ class WN18RR(InMemoryDataset):
             return_tensors="pt",
             add_special_tokens=True,
         )
+        torch.save(tokens, os.path.join(self.root, "tokens.pt"))
         if self._verbose_processing:
             print("done")
         return tokens
