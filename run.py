@@ -31,30 +31,32 @@ def get_train_targets(g, device, load=None, save=None):
     target_labels = torch.ones(target_edges.shape[1], dtype=torch.float)
 
     if load:
-        negative_edges, negative_attrs = torch.load(load)
-        target_edges = torch.cat([target_edges, negative_edges], dim=1)
-        target_attrs = torch.cat([target_attrs, negative_attrs], dim=0)
-        target_labels = torch.cat([target_labels, torch.zeros_like(target_labels)])
-        targets = TensorDataset(
-            target_edges.T.to(device), target_attrs.to(device), target_labels.to(device)
-        )
+        targets = torch.load(load, map_location=device)
         return targets
 
     relation_mask = torch.argmax(target_attrs, dim=1)
+    negative_edges = []
+    negative_attrs = []
     for i in relation_mask.unique():
         mask = relation_mask == i
         target_edges_i = target_edges[:, mask]
         target_attrs_i = target_attrs[mask]
-        src, _, obj = structured_negative_sampling(target_edges_i, g.num_nodes)
-        negative_edges = torch.stack([src, obj])
 
-        target_edges = torch.cat([target_edges, negative_edges], dim=1)
-        target_attrs = torch.cat([target_attrs, target_attrs_i.repeat(2, 1)], dim=0)
-        target_labels = torch.cat([target_labels, torch.zeros_like(target_labels)])
+        src, _, obj = structured_negative_sampling(target_edges_i, g.num_nodes)
+        negative_edges.append(torch.stack([src, obj], dim=0))
+        negative_attrs.append(target_attrs_i)
+
+    negative_edges = torch.cat(negative_edges, dim=1)
+    negative_attrs = torch.cat(negative_attrs, dim=0)
+
+    target_edges = torch.cat([target_edges, negative_edges], dim=1)
+    target_attrs = torch.cat([target_attrs, negative_attrs], dim=0)
+    target_labels = torch.cat([target_labels, torch.zeros_like(target_labels)])
 
     targets = TensorDataset(
         target_edges.T.to(device), target_attrs.to(device), target_labels.to(device)
     )
+
     if save:
         torch.save((target_edges, target_attrs), save)
     return targets
