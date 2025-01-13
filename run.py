@@ -37,9 +37,9 @@ def train_loop(
         "time": [],
     }
     best_loss = 1
-    for epoch in range(100):
+    for epoch in range(epochs):
         t0 = time.time()
-        loss = train(model, optimizer, g, train_targets, batch_size=1024)
+        loss = train(model, optimizer, g, targets, batch_size=batch_size)
         tf = time.time()
 
         if loss < best_loss and save:
@@ -106,7 +106,7 @@ def get_validation_data(g, filter_data=None, save=None, load=None):
 
 
 def filter_edges(validation_data, train_data):
-    train_edges, train_attrs  = train_data
+    train_edges, train_attrs, _ = train_data.tensors
     mask = torch.ones(len(validation_data), dtype=torch.bool)
     for idx, (edge, attr) in enumerate(validation_data):
         repeated_edges = torch.isin(train_edges, edge)
@@ -157,6 +157,9 @@ if __name__ == "__main__":
     argparser.add_argument("--load", type=str, default=None)
     argparser.add_argument("--save", type=str, default=None)
     argparser.add_argument("--epochs", type=int, default=100)
+    argparser.add_argument("--eb", type=int, default=2048)
+    argparser.add_argument("--tb", type=int, default=1024)
+   
     args = argparser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -181,7 +184,7 @@ if __name__ == "__main__":
 
     g = WN18RR(root="data/wn18rr", split="train", verbose_processing=True)[0].to(device)
     g.edge_attr = F.one_hot(g.edge_attr, 12).float().squeeze(1)
-    train_targets = get_train_targets(g, device, load="data/wn18rr/train_targets.pt")
+    train_targets = get_train_targets(g, device, save="data/wn18rr/train_targets.pt")
 
     if args.train:
         optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
@@ -192,6 +195,7 @@ if __name__ == "__main__":
             train_targets,
             epochs=args.epochs,
             save=args.save,
+            batch_size=args.tb
         )
         model.load_state_dict(model_weights)
 
@@ -201,7 +205,7 @@ if __name__ == "__main__":
         validation_data = get_validation_data(
             g_val, filter_data=train_targets, save="data/wn18rr/validation_data.pt"
         )
-        ranks = evaluate(model, g, validation_data, batch_size=2048)
+        ranks = evaluate(model, g, validation_data, batch_size=args.eb)
         mean_rank = sum(ranks) / len(ranks)
         hits_at_1 = sum(rank <= 1 for rank in ranks) / len(ranks)
         hits_at_3 = sum(rank <= 3 for rank in ranks) / len(ranks)
