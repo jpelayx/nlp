@@ -112,7 +112,7 @@ class LinkPredictor(Module):
         self.normalization_layers.append(BatchNorm(input_dim * 2))
 
         self.linear_layers = ModuleList()
-        self.linear_layers.append(nn.Linear(input_dim * 2, hidden_dim[1]))
+        self.linear_layers.append(nn.Linear(input_dim * 2 + edge_dim, hidden_dim[0]))
 
         for l in range(1, num_layers - 1):
             self.normalization_layers.append(BatchNorm(hidden_dim[l - 1]))
@@ -122,13 +122,15 @@ class LinkPredictor(Module):
         self.linear_layers.append(nn.Linear(hidden_dim[-1], output_dim))
 
     def forward(self, xs, xr, xo):
-        xr = self.r_projection(xr)
-        xr = F.relu(xr)
+        # xr = self.r_projection(xr)
+        # xr = F.relu(xr)
 
-        x = self.conv(torch.stack([xs, xo], dim=-1)).squeeze(-1)
-        x = F.relu(x)
+        # x = self.conv(torch.stack([xs, xo], dim=-1)).squeeze(-1)
+        # x = F.relu(x)
 
-        x = torch.cat([x, xo], dim=1)
+        # x = torch.cat([x, xo], dim=1)
+
+        x = torch.cat([xs, xr, xo], dim=1)
 
         for l in range(self.num_layers - 1):
             x = self.normalization_layers[l](x)
