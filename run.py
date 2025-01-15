@@ -12,6 +12,10 @@ import numpy as np
 import csv
 import os
 
+import numpy as np
+import csv
+import os
+
 
 def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
     model.train()
@@ -41,8 +45,28 @@ def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
             preds_golden, preds_corrupted, torch.ones_like(preds_golden), margin=1
         )
 
+    for edges, attrs in link_loader:
+        current_batch_size = edges.shape[0]
+        preds_golden = model(
+            g.x, g.edge_index, g.edge_attr, edges.T[[0, 1]], attrs
+        ).flatten()
+        preds_corrupted_heads = model(
+            g.x, g.edge_index, g.edge_attr, edges.T[[2, 1]], attrs
+        ).flatten()
+        preds_corrupted_tails = model(
+            g.x, g.edge_index, g.edge_attr, edges.T[[0, 3]], attrs
+        ).flatten()
+
+        preds_golden = preds_golden.repeat(2)
+        preds_corrupted = torch.cat([preds_corrupted_heads, preds_corrupted_tails])
+
+        loss = F.margin_ranking_loss(
+            preds_golden, preds_corrupted, torch.ones_like(preds_golden), margin=1
+        )
+
         loss.backward()
         optimizer.step()
+        total_loss += loss.item()
         total_loss += loss.item()
     if scheduler:
         scheduler.step()
@@ -90,8 +114,21 @@ def train_loop(
     batch_size=None,
     scheduler=None,
     save=None,
+    model,
+    optimizer,
+    g,
+    targets,
+    validation_targets,
+    epochs,
+    batch_size=None,
+    scheduler=None,
+    save=None,
 ):
     results = {
+        "epoch": None,
+        "loss": None,
+        "time": None,
+        "validation loss": None,
         "epoch": None,
         "loss": None,
         "time": None,
@@ -104,11 +141,23 @@ def train_loop(
             csv_writer.writeheader()
 
     best_val_loss = 10000
+    result_file = f"{save}_train.csv"
+    if not os.path.exists(result_file):
+        with open(result_file, "w") as f:
+            csv_writer = csv.DictWriter(f, results.keys())
+            csv_writer.writeheader()
+
+    best_val_loss = 10000
     for epoch in range(epochs):
         t0 = time.time()
         loss = train(model, optimizer, g, targets, batch_size=batch_size)
         tf = time.time()
 
+        val_loss = validation(model, validation_targets, g)
+
+        if val_loss < best_val_loss and save:
+            torch.save(model.state_dict(), f"{save}.pt")
+            best_val_loss = val_loss
         val_loss = validation(model, validation_targets, g)
 
         if val_loss < best_val_loss and save:
@@ -137,9 +186,17 @@ def get_train_targets(g, save=None):
     t, h, corrupted_h = structured_negative_sampling(edge_index[[1, 0]], g.num_nodes)
     target_edges = torch.stack([h, t, corrupted_h, corrupted_t], dim=0)
     target_attrs = edge_attr
+def get_train_targets(g, save=None):
+    edge_index, edge_attr = remove_self_loops(g.edge_index, g.edge_attr)
+    h, t, corrupted_t = structured_negative_sampling(edge_index, g.num_nodes)
+    t, h, corrupted_h = structured_negative_sampling(edge_index[[1, 0]], g.num_nodes)
+    target_edges = torch.stack([h, t, corrupted_h, corrupted_t], dim=0)
+    target_attrs = edge_attr
 
     targets = TensorDataset(target_edges.T, target_attrs)
+    targets = TensorDataset(target_edges.T, target_attrs)
     if save:
+        torch.save(targets, save)
         torch.save(targets, save)
     return targets
 
@@ -185,6 +242,10 @@ def evaluate(model, g, validation_data, batch_size=None):
     num_entities = node_embeddings.shape[0]
     for i, (edges, attrs) in enumerate(link_loader):
         current_batch_size = edges.shape[0]
+    link_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=False)
+    num_entities = node_embeddings.shape[0]
+    for i, (edges, attrs) in enumerate(link_loader):
+        current_batch_size = edges.shape[0]
         t0 = time.time()
         with torch.no_grad():
             xs = node_embeddings[edges[:, 0]]
@@ -192,7 +253,30 @@ def evaluate(model, g, validation_data, batch_size=None):
             xr = attrs.repeat_interleave(num_entities, dim=0)
             xo = node_embeddings.repeat(current_batch_size, 1)
             preds = model.link_predictor(xs, xr, xo).to("cpu").numpy()
+            xs = node_embeddings[edges[:, 0]]
+            xs = xs.repeat_interleave(num_entities, dim=0)
+            xr = attrs.repeat_interleave(num_entities, dim=0)
+            xo = node_embeddings.repeat(current_batch_size, 1)
+            preds = model.link_predictor(xs, xr, xo).to("cpu").numpy()
         tf = time.time()
+
+        preds = preds.reshape((current_batch_size, -1))
+        targets = [
+            preds[p, node]
+            for p, node in zip(range(current_batch_size), edges[:, 1].to("cpu"))
+        ]
+        rank = np.apply_along_axis(np.greater, 0, preds, targets)
+        rank = np.sum(rank, axis=1)
+
+        ranks.extend(rank)
+        eval_time += tf - t0
+        if i % 100 == 0:
+            print(
+                f"Evaluated {(i+1)*batch_size}/{len(validation_data)} - Mean rank: {np.mean(ranks)} ({tf - t0:.2f}s/batch)"
+            )
+    print(
+        f"Total evaluation time: {eval_time:.2f}s ({eval_time/len(ranks):.2f} s/item)"
+    )
 
         preds = preds.reshape((current_batch_size, -1))
         targets = [
@@ -227,6 +311,10 @@ if __name__ == "__main__":
     argparser.add_argument("--tb", type=int, default=2048)
     argparser.add_argument("--lr", type=float, default=0.0001)
 
+    argparser.add_argument("--eb", type=int, default=15)
+    argparser.add_argument("--tb", type=int, default=2048)
+    argparser.add_argument("--lr", type=float, default=0.0001)
+
     args = argparser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -234,13 +322,21 @@ if __name__ == "__main__":
     node_embedder = NodeEmbedder(
         input_dim=768,
         hidden_dim=[128, 64],
+        hidden_dim=[128, 64],
         output_dim=256,
+        edge_dim=5,
+        num_heads=[4, 4],
         edge_dim=5,
         num_heads=[4, 4],
         num_layers=2,
     ).to(device)
 
     link_pred = LinkPredictor(
+        input_dim=256,
+        hidden_dim=[256, 124],
+        output_dim=1,
+        edge_dim=5,
+        num_layers=2,
         input_dim=256,
         hidden_dim=[256, 124],
         output_dim=1,
@@ -261,8 +357,15 @@ if __name__ == "__main__":
         0
     ].to(device)
     validation_targets = get_train_targets(g_val, save="data/wn18rr/validation_data.pt")
+    train_targets = get_train_targets(g, save="data/wn18rr/train_targets.pt")
+
+    g_val = WN18RR(root="data/wn18rr", split="validation", verbose_processing=True)[
+        0
+    ].to(device)
+    validation_targets = get_train_targets(g_val, save="data/wn18rr/validation_data.pt")
 
     if args.train:
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         model_weights = train_loop(
             model,
@@ -270,8 +373,10 @@ if __name__ == "__main__":
             g,
             train_targets,
             validation_targets=validation_targets,
+            validation_targets=validation_targets,
             epochs=args.epochs,
             save=args.save,
+            batch_size=args.tb,
             batch_size=args.tb,
         )
         model.load_state_dict(model_weights)
@@ -287,6 +392,11 @@ if __name__ == "__main__":
         hits_at_1 = sum(rank <= 1 for rank in ranks) / len(ranks)
         hits_at_3 = sum(rank <= 3 for rank in ranks) / len(ranks)
         hits_at_10 = sum(rank <= 10 for rank in ranks) / len(ranks)
+        results = f"Mean Rank: {mean_rank}\nHits@1: {hits_at_1}\nHits@3: {hits_at_3}\nHits@10: {hits_at_10}"
+        print(results)
+        if args.save:
+            with open(f"{args.save}_eval.txt", "a") as f:
+                f.write(results)
         results = f"Mean Rank: {mean_rank}\nHits@1: {hits_at_1}\nHits@3: {hits_at_3}\nHits@10: {hits_at_10}"
         print(results)
         if args.save:
