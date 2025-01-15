@@ -29,46 +29,38 @@ class NodeEmbedder(Module):
         if self._fake:
             return
 
+        try:
+            assert len(hidden_dim) == num_layers
+        except AssertionError:
+            raise ValueError("hidden_dim must be an iterable of length num_layers")
+
         self.dropout = dropout
         self.num_layers = num_layers
 
         self.norm_layers = ModuleList()
         self.norm_layers.append(BatchNorm(input_dim))
 
+        self.x_projection = nn.Linear(input_dim, hidden_dim[0])
+
         self.conv_layers = ModuleList()
-        self.conv_layers.append(
-            GATv2Conv(
-                input_dim,
-                hidden_dim,
-                num_heads,
-                edge_dim=edge_dim,
-                add_self_loops=False,
-            )
-        )
-
         self.lin_layers = ModuleList()
-        self.lin_layers.append(
-            nn.Linear(hidden_dim * num_heads, hidden_dim * num_heads)
-        )
-
-        for _ in range(num_layers - 1):
-            self.norm_layers.append(BatchNorm(hidden_dim * num_heads))
+        hidden_dim.append(output_dim)
+        for l in range(num_layers):
             self.conv_layers.append(
                 GATv2Conv(
-                    hidden_dim * num_heads,
-                    hidden_dim,
-                    num_heads,
+                    hidden_dim[l],
+                    hidden_dim[l],
+                    num_heads[l],
                     edge_dim=edge_dim,
                     add_self_loops=False,
                 )
             )
             self.lin_layers.append(
-                nn.Linear(hidden_dim * num_heads, hidden_dim * num_heads)
+                nn.Linear(hidden_dim[l] * num_heads[l], hidden_dim[l + 1])
             )
-
+        self.norm_layers.append(BatchNorm(hidden_dim[-1]))
         self.out = Sequential(
-            nn.Linear(hidden_dim * num_heads, hidden_dim),
-            nn.Linear(hidden_dim, output_dim),
+            nn.Linear(hidden_dim[-1], output_dim),
         )
 
     def forward(
@@ -79,13 +71,16 @@ class NodeEmbedder(Module):
     ) -> torch.Tensor:
         if self._fake:
             return x
+        x = self.norm_layers[0](x)
+        x = self.x_projection(x)
         for l in range(self.num_layers):
-            x = self.norm_layers[l](x)
             x = self.conv_layers[l](x, edge_index, edge_attr)
+            x = F.relu(x)
             x = self.lin_layers[l](x)
             x = F.relu(x)
             if not self.dropout is None:
                 x = F.dropout(x, p=self.dropout, training=self.training)
+        self.norm_layers[-1](x)
         return self.out(x)
 
 
@@ -106,40 +101,38 @@ class LinkPredictor(Module):
 
         self.r_projection = nn.Linear(edge_dim, input_dim)
 
-        self.conv = nn.Conv1d(input_dim, input_dim, kernel_size=2)
+        self.conv = nn.Conv1d(input_dim, input_dim, kernel_size=3)
 
         self.normalization_layers = ModuleList()
-        self.normalization_layers.append(BatchNorm(input_dim * 2))
+        self.normalization_layers.append(BatchNorm(input_dim))
 
         self.linear_layers = ModuleList()
-        self.linear_layers.append(nn.Linear(input_dim * 2 + edge_dim, hidden_dim[0]))
+        self.linear_layers.append(nn.Linear(input_dim, hidden_dim[0]))
 
-        for l in range(1, num_layers - 1):
-            self.normalization_layers.append(BatchNorm(hidden_dim[l - 1]))
+        for l in range(1, num_layers):
             self.linear_layers.append(nn.Linear(hidden_dim[l - 1], hidden_dim[l]))
 
         self.normalization_layers.append(BatchNorm(hidden_dim[-1]))
-        self.linear_layers.append(nn.Linear(hidden_dim[-1], output_dim))
+        self.linear_layers.append(nn.Linear(hidden_dim[num_layers - 1], output_dim))
 
     def forward(self, xs, xr, xo):
-        # xr = self.r_projection(xr)
-        # xr = F.relu(xr)
+        xr = self.r_projection(xr)
+        xr = F.relu(xr)
 
-        # x = self.conv(torch.stack([xs, xo], dim=-1)).squeeze(-1)
-        # x = F.relu(x)
+        x = self.conv(torch.stack([xs, xr, xo], dim=-1)).squeeze(-1)
+        x = F.relu(x)
 
-        # x = torch.cat([x, xo], dim=1)
+        x = self.normalization_layers[0](x)
 
-        x = torch.cat([xs, xr, xo], dim=1)
-
-        for l in range(self.num_layers - 1):
-            x = self.normalization_layers[l](x)
+        for l in range(self.num_layers):
             x = self.linear_layers[l](x)
             x = F.relu(x)
             if not self.dropout is None:
                 x = F.dropout(x, p=self.dropout, training=self.training)
+
         x = self.normalization_layers[-1](x)
         x = self.linear_layers[-1](x)
+        x = F.sigmoid(x)
 
         return x
 

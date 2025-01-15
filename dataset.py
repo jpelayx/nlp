@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import TensorDataset
 from torch_geometric.data import InMemoryDataset, Data, DataLoader
-from torch_geometric.utils import structured_negative_sampling
+from torch_geometric.utils import structured_negative_sampling, add_self_loops
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer, BertModel
 
@@ -27,6 +27,20 @@ class WN18RR(InMemoryDataset):
         "_verb_group": 10,
         "_similar_to": 11,
     }
+    _relations = [
+        "id",
+        "hypernym",
+        "derivationally related form",
+        "instance hypernym",
+        "also see",
+        "member meronym",
+        "synset domain topic of",
+        "has part",
+        "member of domain usage",
+        "member of domain region",
+        "verb group",
+        "similar to",
+    ]
 
     def __init__(
         self,
@@ -84,6 +98,8 @@ class WN18RR(InMemoryDataset):
         edge_attr = torch.tensor(
             relations["relation"].map(self.edge2id.get).to_numpy(), dtype=torch.long
         ).unsqueeze(1)
+        edge_index, edge_attr = add_self_loops(edge_index, edge_attr, fill_value=0)
+        edge_attr = self._encode_relations(edge_attr)
 
         augmented_definitions = self._compose_definitions(definitions)
         tokens = self._tokenize(augmented_definitions)
@@ -99,9 +115,38 @@ class WN18RR(InMemoryDataset):
             encodings = self._encode(tokens)
             data = Data(edge_index=edge_index, edge_attr=edge_attr, x=encodings)
         data.num_nodes = len(definitions)
-        data = self._add_self_loops(data)
 
         self.save([data], self.processed_paths[self._split])
+
+    def _encode_relations(self, edge_attr):
+        save_path = os.path.join(self.root, f"relation_encodings_{self._split}.pt")
+        if os.path.exists(save_path):
+            if self._verbose_processing:
+                print("Loading relation encodings from file")
+            return torch.load(save_path)
+
+        if self.tokenizer is None:
+            tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        else:
+            tokenizer = self.tokenizer
+            del self.tokenizer
+
+        if self._verbose_processing:
+            print("Encoding relations ... ", end="")
+        base_encoding = tokenizer(
+            list(self._relations),
+            padding="longest",
+            return_tensors="pt",
+            add_special_tokens=False,
+        ).input_ids
+        base_encoding = base_encoding / (torch.sum(base_encoding, dim=1)).unsqueeze(1)
+        edge_attr = base_encoding[edge_attr.flatten()]
+        edge_attr = torch.normal(edge_attr, 0.05)
+        if self._verbose_processing:
+            print(" done!")
+
+        torch.save(edge_attr, save_path)
+        return edge_attr
 
     def _tokenize(self, definitions):
         if os.path.exists(os.path.join(self.root, "tokens.pt")):
@@ -204,21 +249,6 @@ class WN18RR(InMemoryDataset):
             return f"the definition of the {pos} {syn} is {definition}"
 
         return defs.apply(augment_definition, axis=1)
-
-    def _add_self_loops(self, data):
-        edge_index_i, edge_index_j = data.edge_index
-        edge_index_i = torch.cat(
-            [edge_index_i, torch.arange(data.num_nodes, dtype=torch.int64)]
-        )
-        edge_index_j = torch.cat(
-            [edge_index_j, torch.arange(data.num_nodes, dtype=torch.int64)]
-        )
-        data.edge_index = torch.stack([edge_index_i, edge_index_j])
-
-        data.edge_attr = torch.cat(
-            [data.edge_attr, torch.zeros(data.num_nodes, dtype=torch.long).unsqueeze(1)]
-        )
-        return data
 
     def _split_map(self, split):
         if split == "train":
@@ -326,7 +356,6 @@ class RelationsDS(InMemoryDataset):
         data.token_type_ids = token_type_ids.to(device)
 
         data = self._create_splits(data, device)
-        data = self._add_self_loops(data, data.num_nodes, device)
 
         return [data.to("cpu")]
 
@@ -349,27 +378,6 @@ class RelationsDS(InMemoryDataset):
         data.y = labels.to(device)
         data.edge_index = data.edge_index[:, data.train_mask]
         data.edge_attr = data.edge_attr[data.train_mask]
-        return data
-
-    def _add_self_loops(self, data, num_nodes, device):
-        edge_index_i = torch.cat(
-            [
-                data.edge_index[0],
-                torch.arange(num_nodes, dtype=torch.int64, device=device),
-            ]
-        )
-        edge_index_j = torch.cat(
-            [
-                data.edge_index[1],
-                torch.arange(num_nodes, dtype=torch.int64, device=device),
-            ]
-        )
-        data.edge_index = torch.stack([edge_index_i, edge_index_j])
-
-        data.edge_attr = torch.cat(
-            [data.edge_attr, torch.zeros(num_nodes, dtype=torch.long, device=device)]
-        )
-
         return data
 
     def _compose_definition(self, arg):
@@ -399,27 +407,6 @@ def select_by_edge_type(edge_type: str, data: RelationsDS) -> Data:
     new_data.token_type_ids = token_type_ids
 
     return new_data
-
-
-def add_self_loops(data: Data, num_nodes: int) -> Data:
-    device = data.edge_attr.device
-    edge_index_i, edge_index_j = data.edge_index
-    edge_index_i = torch.cat(
-        [edge_index_i, torch.arange(0, num_nodes, dtype=torch.int64, device=device)]
-    )
-    edge_index_j = torch.cat(
-        [edge_index_j, torch.arange(0, num_nodes, dtype=torch.int64, device=device)]
-    )
-    edge_index = torch.stack([edge_index_i, edge_index_j])
-
-    edge_attr = data.edge_attr
-    edge_attr = torch.cat([edge_attr, torch.zeros(num_nodes, device=device)])
-    # edge2id['ID'] == 0
-
-    data.edge_index = edge_index
-    data.edge_attr = edge_attr
-
-    return data
 
 
 def split_data_stratified(g, num_nodes, add_self_loops=True):
