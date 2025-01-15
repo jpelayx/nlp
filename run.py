@@ -8,6 +8,10 @@ from torch_geometric.utils import structured_negative_sampling, remove_self_loop
 
 import time
 import pandas as pd
+import numpy as np
+import csv
+import os
+
 
 def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
     model.train()
@@ -17,77 +21,124 @@ def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
     link_loader = DataLoader(targets, batch_size=batch_size, shuffle=True)
 
     total_loss = 0
-    for edges, attrs, labels in link_loader:
-        preds = model(g.x, g.edge_index, g.edge_attr, edges.T, attrs)
-        loss = F.binary_cross_entropy_with_logits(preds.flatten(), labels)
+    for edges, attrs in link_loader:
+        current_batch_size = edges.shape[0]
+        preds_golden = model(
+            g.x, g.edge_index, g.edge_attr, edges.T[[0, 1]], attrs
+        ).flatten()
+        preds_corrupted_heads = model(
+            g.x, g.edge_index, g.edge_attr, edges.T[[2, 1]], attrs
+        ).flatten()
+        preds_corrupted_tails = model(
+            g.x, g.edge_index, g.edge_attr, edges.T[[0, 3]], attrs
+        ).flatten()
+
+        preds_golden = preds_golden.repeat(2)
+        preds_corrupted = torch.cat([preds_corrupted_heads, preds_corrupted_tails])
+
+        loss = F.margin_ranking_loss(
+            preds_golden, preds_corrupted, torch.ones_like(preds_golden), margin=1
+        )
+
         loss.backward()
         optimizer.step()
-        total_loss += torch.sum(loss)
+        total_loss += loss.item()
     if scheduler:
         scheduler.step()
-    return total_loss / len(targets)
+    return total_loss
+
+
+def validation(model, targets, g, batch_size=10000):
+    model.eval()
+    link_loader = DataLoader(targets, batch_size=batch_size, shuffle=False)
+    with torch.no_grad():
+        x = model.node_embedder(g.x, g.edge_index, g.edge_attr)
+        total_loss = 0
+        for edges, attrs in link_loader:
+            heads = x[edges[:, 0]]
+            tails = x[edges[:, 1]]
+            corrupted_heads = x[edges[:, 2]]
+            corrupted_tails = x[edges[:, 3]]
+            xr = attrs
+            preds_golden = model.link_predictor(heads, xr, tails).flatten()
+            preds_corrupted_heads = model.link_predictor(
+                corrupted_heads, xr, tails
+            ).flatten()
+            preds_corrupted_tails = model.link_predictor(
+                heads, xr, corrupted_tails
+            ).flatten()
+
+            preds_golden = preds_golden.repeat(2)
+            preds_corrupted = torch.cat([preds_corrupted_heads, preds_corrupted_tails])
+            loss = F.margin_ranking_loss(
+                preds_golden, preds_corrupted, torch.ones_like(preds_golden), margin=1
+            )
+            total_loss += loss.item()
+
+    return total_loss
 
 
 def train_loop(
-    model, optimizer, g, targets, epochs, batch_size=None, scheduler=None, save=None
+    model,
+    optimizer,
+    g,
+    targets,
+    validation_targets,
+    epochs,
+    batch_size=None,
+    scheduler=None,
+    save=None,
 ):
     results = {
-        "epoch": [],
-        "loss": [],
-        "time": [],
+        "epoch": None,
+        "loss": None,
+        "time": None,
+        "validation loss": None,
     }
-    best_loss = 1
+    result_file = f"{save}_train.csv"
+    if not os.path.exists(result_file):
+        with open(result_file, "w") as f:
+            csv_writer = csv.DictWriter(f, results.keys())
+            csv_writer.writeheader()
+
+    best_val_loss = 10000
     for epoch in range(epochs):
         t0 = time.time()
         loss = train(model, optimizer, g, targets, batch_size=batch_size)
         tf = time.time()
 
-        if loss < best_loss and save:
-            torch.save(model.state_dict(), save)
-            best_loss = loss
+        val_loss = validation(model, validation_targets, g)
 
-        results["epoch"].append(epoch)
-        results["loss"].append(loss.item())
-        results["time"].append(tf - t0)
-        print(f"Epoch {epoch} - Loss: {loss} ({tf - t0:.2f}s)")
+        if val_loss < best_val_loss and save:
+            torch.save(model.state_dict(), f"{save}.pt")
+            best_val_loss = val_loss
 
-    pd.DataFrame(results).to_csv("train_results.csv", index=False)
-    return torch.load(save)
-
-
-def get_train_targets(g, device, load=None, save=None):
-    target_edges, target_attrs = remove_self_loops(g.edge_index, g.edge_attr)
-    target_labels = torch.ones(target_edges.shape[1], dtype=torch.float)
-
-    if load:
-        targets = torch.load(load, map_location=device)
-        return targets
-
-    relation_mask = torch.argmax(target_attrs, dim=1)
-    negative_edges = []
-    negative_attrs = []
-    for i in relation_mask.unique():
-        mask = relation_mask == i
-        target_edges_i = target_edges[:, mask]
-        target_attrs_i = target_attrs[mask]
-
-        src, _, obj = structured_negative_sampling(target_edges_i, g.num_nodes)
-        negative_edges.append(torch.stack([src, obj], dim=0))
-        negative_attrs.append(target_attrs_i)
-
-    negative_edges = torch.cat(negative_edges, dim=1)
-    negative_attrs = torch.cat(negative_attrs, dim=0)
-
-    target_edges = torch.cat([target_edges, negative_edges], dim=1)
-    target_attrs = torch.cat([target_attrs, negative_attrs], dim=0)
-    target_labels = torch.cat([target_labels, torch.zeros_like(target_labels)])
-
-    targets = TensorDataset(
-        target_edges.T.to(device), target_attrs.to(device), target_labels.to(device)
-    )
-
+        results["epoch"] = epoch
+        results["loss"] = loss.item()
+        results["validation loss"] = val_loss
+        results["time"] = tf - t0
+        with open(result_file, "a") as f:
+            csv_writer = csv.DictWriter(f, results.keys())
+            csv_writer.writerow(results)
+        print(
+            f"Epoch {epoch} - Loss: {loss} - Validation loss: {val_loss} ({tf - t0:.2f}s)"
+        )
     if save:
-        torch.save((target_edges, target_attrs), save)
+        return torch.load(save)
+    else:
+        return model.state_dict()
+
+
+def get_train_targets(g, save=None):
+    edge_index, edge_attr = remove_self_loops(g.edge_index, g.edge_attr)
+    h, t, corrupted_t = structured_negative_sampling(edge_index, g.num_nodes)
+    t, h, corrupted_h = structured_negative_sampling(edge_index[[1, 0]], g.num_nodes)
+    target_edges = torch.stack([h, t, corrupted_h, corrupted_t], dim=0)
+    target_attrs = edge_attr
+
+    targets = TensorDataset(target_edges.T, target_attrs)
+    if save:
+        torch.save(targets, save)
     return targets
 
 
@@ -128,23 +179,36 @@ def evaluate(model, g, validation_data, batch_size=None):
     batch_size = batch_size if batch_size else 1
     ranks = []
     eval_time = 0
-    for edge, attr in validation_data:
-        preds = []
+    link_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=False)
+    num_entities = node_embeddings.shape[0]
+    for i, (edges, attrs) in enumerate(link_loader):
+        current_batch_size = edges.shape[0]
         t0 = time.time()
         with torch.no_grad():
-            entity_loader = DataLoader(
-                node_embeddings, batch_size=batch_size, shuffle=False
-            )
-            for xo in entity_loader:
-                current_batch_size = xo.shape[0]
-                xs = node_embeddings[edge[0]].repeat(current_batch_size, 1)
-                xr = attr.repeat(current_batch_size, 1)
-                preds.append(model.link_predictor(xs, xr, xo).to("cpu"))
+            xs = node_embeddings[edges[:, 0]]
+            xs = xs.repeat_interleave(num_entities, dim=0)
+            xr = attrs.repeat_interleave(num_entities, dim=0)
+            xo = node_embeddings.repeat(current_batch_size, 1)
+            preds = model.link_predictor(xs, xr, xo).to("cpu").numpy()
         tf = time.time()
-        preds = torch.cat(preds)
-        ranks.append(torch.sum(preds > preds[edge[1]]).item())
-        eval_time += tf - t0 
-    print(f"Total evaluation time: {eval_time:.2f}s ({eval_time/len(ranks):.2f} s/item)")    
+
+        preds = preds.reshape((current_batch_size, -1))
+        targets = [
+            preds[p, node]
+            for p, node in zip(range(current_batch_size), edges[:, 1].to("cpu"))
+        ]
+        rank = np.apply_along_axis(np.greater, 0, preds, targets)
+        rank = np.sum(rank, axis=1)
+
+        ranks.extend(rank)
+        eval_time += tf - t0
+        if i % 100 == 0:
+            print(
+                f"Evaluated {(i+1)*batch_size}/{len(validation_data)} - Mean rank: {np.mean(ranks)} ({tf - t0:.2f}s/batch)"
+            )
+    print(
+        f"Total evaluation time: {eval_time:.2f}s ({eval_time/len(ranks):.2f} s/item)"
+    )
     return ranks
 
 
@@ -157,62 +221,73 @@ if __name__ == "__main__":
     argparser.add_argument("--load", type=str, default=None)
     argparser.add_argument("--save", type=str, default=None)
     argparser.add_argument("--epochs", type=int, default=100)
-    argparser.add_argument("--eb", type=int, default=2048)
-    argparser.add_argument("--tb", type=int, default=1024)
-   
+    argparser.add_argument("--eb", type=int, default=15)
+    argparser.add_argument("--tb", type=int, default=2048)
+    argparser.add_argument("--lr", type=float, default=0.0001)
+
     args = argparser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     node_embedder = NodeEmbedder(
         input_dim=768,
-        hidden_dim=256,
+        hidden_dim=[128, 64],
         output_dim=256,
-        edge_dim=12,
-        num_heads=1,
+        edge_dim=5,
+        num_heads=[4, 4],
         num_layers=2,
     ).to(device)
 
     link_pred = LinkPredictor(
-        input_dim=256, hidden_dim=128, output_dim=1, edge_dim=12, num_layers=3
+        input_dim=256,
+        hidden_dim=[256, 124],
+        output_dim=1,
+        edge_dim=5,
+        num_layers=2,
     ).to(device)
 
     model = Model(node_embedder, link_pred)
 
     if args.load:
-        model.load_state_dict(torch.load(args.load))
+        model.load_state_dict(torch.load(f"{args.load}.pt"))
 
     g = WN18RR(root="data/wn18rr", split="train", verbose_processing=True)[0].to(device)
-    g.edge_attr = F.one_hot(g.edge_attr, 12).float().squeeze(1)
-    train_targets = get_train_targets(g, device, save="data/wn18rr/train_targets.pt")
+    train_targets = get_train_targets(g, save="data/wn18rr/train_targets.pt")
+
+    g_val = WN18RR(root="data/wn18rr", split="validation", verbose_processing=True)[
+        0
+    ].to(device)
+    validation_targets = get_train_targets(g_val, save="data/wn18rr/validation_data.pt")
 
     if args.train:
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
         model_weights = train_loop(
             model,
             optimizer,
             g,
             train_targets,
+            validation_targets=validation_targets,
             epochs=args.epochs,
             save=args.save,
-            batch_size=args.tb
+            batch_size=args.tb,
         )
         model.load_state_dict(model_weights)
 
     if args.validate:
-        g_val = WN18RR(root="data/wn18rr", split="validation", verbose_processing=True)[0].to(device)
-        g_val.edge_attr = F.one_hot(g_val.edge_attr, 12).float().squeeze(1)
-        validation_data = get_validation_data(
-            g_val, filter_data=train_targets, save="data/wn18rr/validation_data.pt"
+
+        g_val = WN18RR(root="data/wn18rr", split="test", verbose_processing=True)[0].to(
+            device
         )
+        validation_data = get_validation_data(g_val, save="data/wn18rr/test_data.pt")
         ranks = evaluate(model, g, validation_data, batch_size=args.eb)
         mean_rank = sum(ranks) / len(ranks)
         hits_at_1 = sum(rank <= 1 for rank in ranks) / len(ranks)
         hits_at_3 = sum(rank <= 3 for rank in ranks) / len(ranks)
         hits_at_10 = sum(rank <= 10 for rank in ranks) / len(ranks)
-        print(
-            f"Mean Rank: {mean_rank}\nHits@1: {hits_at_1}\nHits@3: {hits_at_3}\nHits@10: {hits_at_10}"
-        )
+        results = f"Mean Rank: {mean_rank}\nHits@1: {hits_at_1}\nHits@3: {hits_at_3}\nHits@10: {hits_at_10}"
+        print(results)
+        if args.save:
+            with open(f"{args.save}_eval.txt", "a") as f:
+                f.write(results)
 
     print("Done")
-
