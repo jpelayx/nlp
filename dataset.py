@@ -141,7 +141,7 @@ class WN18RR(InMemoryDataset):
         ).input_ids
         base_encoding = base_encoding / (torch.sum(base_encoding, dim=1)).unsqueeze(1)
         edge_attr = base_encoding[edge_attr.flatten()]
-        edge_attr = torch.normal(edge_attr, 0.05)
+        # edge_attr = torch.normal(edge_attr, 0.05)
         if self._verbose_processing:
             print(" done!")
 
