@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from torch.nn import Module, ModuleList, Sequential, Conv1d
+
 from torch.utils.data import DataLoader
 from torch_geometric.nn import GCNConv, GATv2Conv, BatchNorm
 from transformers import BertModel
@@ -70,7 +71,8 @@ class NodeEmbedder(Module):
         edge_attr: torch.Tensor,
     ) -> torch.Tensor:
         if self._fake:
-            return x
+            return x, edge_attr
+
         x = self.norm_layers[0](x)
         x = self.x_projection(x)
         for l in range(self.num_layers):
@@ -82,6 +84,44 @@ class NodeEmbedder(Module):
                 x = F.dropout(x, p=self.dropout, training=self.training)
         self.norm_layers[-1](x)
         return self.out(x)
+
+
+class RelationEmbedder(Module):
+    def __init__(self, edge_dim, output_dim):
+        super().__init__()
+
+        self.r_project = nn.Linear(edge_dim, output_dim)
+        self.conv = nn.Conv1d(output_dim, output_dim, 3)
+
+    def forward(self, x, edge_index, edge_attr):
+        xh = x[edge_index[0]]
+        xt = x[edge_index[1]]
+        xr = F.relu(self.r_project(edge_attr))
+
+        xr = self.conv(torch.stack([xh, xt, xr], dim=-1)).squeeze(-1)
+        xr = F.relu(xr)
+        return xr
+
+
+class TransE(Module):
+    def __init__(self, p_norm=1.0, margin=1.0):
+        super().__init__()
+        self.p_norm = p_norm
+        self.margin = margin
+
+    def forward(self, xh, xr, xt):
+        xh = F.normalize(xh, p=self.p_norm, dim=-1)
+        xt = F.normalize(xt, p=self.p_norm, dim=-1)
+
+        return -((xh + xr) - xt).norm(p=self.p_norm, dim=-1)
+
+    def loss(self, golden_score, corrupted_score):
+        return F.margin_ranking_loss(
+            golden_score,
+            corrupted_score,
+            torch.ones_like(golden_score),
+            margin=self.margin,
+        )
 
 
 class LinkPredictor(Module):
@@ -138,17 +178,21 @@ class LinkPredictor(Module):
 
 
 class Model(Module):
-    def __init__(self, node_embedder, link_predictor) -> None:
+    def __init__(self, node_embedder, relation_embedder, link_predictor) -> None:
         super().__init__()
         self.node_embedder = node_embedder
+        self.relation_embedder = relation_embedder
         self.link_predictor = link_predictor
 
-    def forward(self, x, edge_index, edge_attr, target_edges, target_edge_attrs):
-        emb = self.node_embedder(x, edge_index, edge_attr)
+    def forward(self, x, edge_index, edge_attr, target_edge_index, target_edge_attr):
+        x = self.node_embedder(x, edge_index, edge_attr)
+        xr = self.relation_embedder(x, target_edge_index, target_edge_attr)
 
-        xs = emb[target_edges[0]]
-        xo = emb[target_edges[1]]
-        xr = target_edge_attrs
+        xs = x[target_edge_index[0]]
+        xo = x[target_edge_index[1]]
         preds = self.link_predictor(xs, xr, xo)
 
         return preds
+
+    def loss_function(self):
+        return self.link_predictor.loss

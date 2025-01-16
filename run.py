@@ -1,5 +1,5 @@
 from dataset import WN18RR
-from model import NodeEmbedder, LinkPredictor, Model
+from model import NodeEmbedder, RelationEmbedder, TransE, Model
 
 import torch
 import torch.nn.functional as F
@@ -21,6 +21,7 @@ def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
     num_batches = len(link_loader)
 
     total_loss = 0
+    loss_function = model.loss_function()
     for edges, attrs in link_loader:
         x = model.node_embedder(g.x, g.edge_index, g.edge_attr)
 
@@ -28,20 +29,22 @@ def train(model, optimizer, g, targets, batch_size=None, scheduler=None):
         tails = x[edges[:, 1]]
         corrupted_heads = x[edges[:, 2]]
         corrupted_tails = x[edges[:, 3]]
-        xr = attrs
-        preds_golden = model.link_predictor(heads, xr, tails).flatten()
+
+        xr_golden = model.relation_embedder(x, edges[:, [0, 1]].T, attrs)
+        xr_corrupted_heads = model.relation_embedder(x, edges[:, [2, 1]].T, attrs)
+        xr_corrupted_tails = model.relation_embedder(x, edges[:, [0, 3]].T, attrs)
+
+        preds_golden = model.link_predictor(heads, xr_golden, tails).flatten()
         preds_corrupted_heads = model.link_predictor(
-            corrupted_heads, xr, tails
+            corrupted_heads, xr_corrupted_heads, tails
         ).flatten()
         preds_corrupted_tails = model.link_predictor(
-            heads, xr, corrupted_tails
+            heads, xr_corrupted_tails, corrupted_tails
         ).flatten()
 
         preds_golden = preds_golden.repeat(2)
         preds_corrupted = torch.cat([preds_corrupted_heads, preds_corrupted_tails])
-        loss = F.margin_ranking_loss(
-            preds_golden, preds_corrupted, torch.ones_like(preds_golden), margin=1
-        )
+        loss = loss_function(preds_golden, preds_corrupted)
 
         loss.backward()
         optimizer.step()
@@ -58,25 +61,27 @@ def validation(model, targets, g, batch_size=10000):
     with torch.no_grad():
         x = model.node_embedder(g.x, g.edge_index, g.edge_attr)
         total_loss = 0
+        loss_function = model.loss_function()
         for edges, attrs in link_loader:
             heads = x[edges[:, 0]]
             tails = x[edges[:, 1]]
             corrupted_heads = x[edges[:, 2]]
             corrupted_tails = x[edges[:, 3]]
-            xr = attrs
-            preds_golden = model.link_predictor(heads, xr, tails).flatten()
+            xr_golden = model.relation_embedder(x, edges[:, [0, 1]].T, attrs)
+            xr_corrupted_heads = model.relation_embedder(x, edges[:, [2, 1]].T, attrs)
+            xr_corrupted_tails = model.relation_embedder(x, edges[:, [0, 3]].T, attrs)
+
+            preds_golden = model.link_predictor(heads, xr_golden, tails).flatten()
             preds_corrupted_heads = model.link_predictor(
-                corrupted_heads, xr, tails
+                corrupted_heads, xr_corrupted_heads, tails
             ).flatten()
             preds_corrupted_tails = model.link_predictor(
-                heads, xr, corrupted_tails
+                heads, xr_corrupted_tails, corrupted_tails
             ).flatten()
 
             preds_golden = preds_golden.repeat(2)
             preds_corrupted = torch.cat([preds_corrupted_heads, preds_corrupted_tails])
-            loss = F.margin_ranking_loss(
-                preds_golden, preds_corrupted, torch.ones_like(preds_golden), margin=1
-            )
+            loss = loss_function(preds_golden, preds_corrupted)
             total_loss += loss.item()
 
     return total_loss / num_batches
@@ -101,8 +106,8 @@ def train_loop(
     }
     result_file = f"{save}_train.csv"
     if not os.path.exists(result_file):
-        with open(result_file, "w") as f:
-            csv_writer = csv.DictWriter(f, results.keys())
+        with open(result_file, "w", newline="") as f:
+            csv_writer = csv.DictWriter(f, fieldnames=results.keys())
             csv_writer.writeheader()
 
     best_loss = 10000
@@ -126,7 +131,7 @@ def train_loop(
             csv_writer.writerow(results)
         print(f"Epoch {epoch} - Loss: {loss} - Test loss: {test_loss} ({tf - t0:.2f}s)")
     if save:
-        return torch.load(save)
+        return torch.load(f"{save}.pt")
     else:
         return model.state_dict()
 
@@ -189,7 +194,8 @@ def evaluate(model, g, validation_data, batch_size=None):
         with torch.no_grad():
             xs = node_embeddings[edges[:, 0]]
             xs = xs.repeat_interleave(num_entities, dim=0)
-            xr = attrs.repeat_interleave(num_entities, dim=0)
+            xr = model.relation_embedder(node_embeddings, edges.T, attrs)
+            xr = xr.repeat_interleave(num_entities, dim=0)
             xo = node_embeddings.repeat(current_batch_size, 1)
             preds = model.link_predictor(xs, xr, xo).to("cpu").numpy()
         tf = time.time()
@@ -231,41 +237,31 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    g = WN18RR(root="data/wn18rr", split="train", verbose_processing=True)[0].to(device)
+    num_nodes = g.num_nodes
+    num_relations = g.num_relations
+
     node_embedder = NodeEmbedder(
         input_dim=768,
-        hidden_dim=[128, 64],
+        hidden_dim=[256, 128, 64],
         output_dim=256,
         edge_dim=5,
-        num_heads=[4, 4],
-        num_layers=2,
+        num_heads=[6, 4, 4],
+        num_layers=3,
     ).to(device)
+    relation_embedder = RelationEmbedder(edge_dim=5, output_dim=256).to(device)
+    link_pred = TransE().to(device)
 
-    link_pred = LinkPredictor(
-        input_dim=256,
-        hidden_dim=[256, 124],
-        output_dim=1,
-        edge_dim=5,
-        num_layers=2,
-    ).to(device)
-
-    model = Model(node_embedder, link_pred)
+    model = Model(node_embedder, relation_embedder, link_pred)
 
     if args.load:
         model.load_state_dict(torch.load(f"{args.load}.pt"))
         print(f"Loaded model {args.load}")
 
-    g = WN18RR(root="data/wn18rr", split="train", verbose_processing=True)[0].to(device)
-    # train_targets = get_train_targets(g, save="data/wn18rr/train_targets.pt")
+    g_val = WN18RR(root="data/wn18rr", split="validation")[0].to(device)
+    train_targets = get_train_targets(g_val, save="data/wn18rr/train_targets.pt")
 
-    g_val = WN18RR(root="data/wn18rr", split="validation", verbose_processing=True)[
-        0
-    ].to(device)
-    validation_targets = get_train_targets(g_val, save="data/wn18rr/validation_data.pt")
-    train_targets = get_train_targets(g, save="data/wn18rr/train_targets.pt")
-
-    g_test = WN18RR(root="data/wn18rr", split="test", verbose_processing=True)[0].to(
-        device
-    )
+    g_test = WN18RR(root="data/wn18rr", split="test")[0].to(device)
     test_targets = get_train_targets(g_test, save="data/wn18rr/test_train_data.pt")
 
     if args.train:
@@ -274,7 +270,7 @@ if __name__ == "__main__":
             model,
             optimizer,
             g,
-            validation_targets,
+            train_targets,
             validation_targets=test_targets,
             epochs=args.epochs,
             save=args.save,
@@ -283,9 +279,10 @@ if __name__ == "__main__":
         model.load_state_dict(model_weights)
 
     if args.validate:
-        validation_data = get_validation_data(g_val, save="data/wn18rr/test_data.pt")
-        ranks = evaluate(model, g, validation_data, batch_size=args.eb)
-        mean_rank = sum(ranks) / len(ranks)
+        validation_data = get_validation_data(g_test, save="data/wn18rr/test_data.pt")
+        ranks = evaluate(model, g, validation_data, batch_size=args.eb) + 1
+        mean_rank = np.mean(ranks)
+        mean_reciprocal_rank = np.mean(1 / ranks)
         hits_at_1 = sum(rank <= 1 for rank in ranks) / len(ranks)
         hits_at_3 = sum(rank <= 3 for rank in ranks) / len(ranks)
         hits_at_10 = sum(rank <= 10 for rank in ranks) / len(ranks)

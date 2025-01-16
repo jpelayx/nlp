@@ -115,6 +115,7 @@ class WN18RR(InMemoryDataset):
             encodings = self._encode(tokens)
             data = Data(edge_index=edge_index, edge_attr=edge_attr, x=encodings)
         data.num_nodes = len(definitions)
+        data.num_relations = len(relations)
 
         self.save([data], self.processed_paths[self._split])
 
